@@ -2,8 +2,35 @@ import sharp from 'sharp';
 import jimp from 'jimp';
 import path from 'path';
 
-import { fromBuffer } from 'pdf2pic';
+import { fromBuffer as convertPdfToPng } from 'pdf2pic'
 import { jsPDF } from 'jspdf';
+
+import { PDFDocument } from "pdf-lib";
+
+export async function mergePdfs(pdfsToMerge) {
+  const mergedPdf = await PDFDocument.create();
+
+  const createInnerPromise = async (arrayBuffer) => {
+    const pdf = await PDFDocument.load(arrayBuffer);
+    return await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+  };
+
+  const outerPromise = pdfsToMerge.map((arrayBuffer) => {
+    const innerPromise = createInnerPromise(arrayBuffer);
+    return innerPromise;
+  });
+
+  const resultOuterPromise = await Promise.all(outerPromise);
+
+  resultOuterPromise.forEach((pageArray) => {
+    pageArray.forEach((page) => {
+      mergedPdf.addPage(page);
+    });
+  });
+
+  return (await mergedPdf.save()).buffer;
+}
+
 
 async function fromFile(buffer, type) {
   console.log('fromFile:', type);
@@ -25,28 +52,22 @@ async function fromFile(buffer, type) {
       newBuffers.push(newBuffer);
     }
     case 'application/pdf': {
-      const options = {
-        density: 400,
-        width: 1000,
-        preserveAspectRatio: false,
-        format: "png",
-      };
-      const convert = fromBuffer(buffer, options);
-      /*
-      const pngPageOutput = await pdfToPng(buffer, // The function accepts PDF file path or a Buffer
-        {
-          disableFontFace: false, // When `false`, fonts will be rendered using a built-in font renderer that constructs the glyphs with primitive path commands. Default value is true.
-          useSystemFonts: false, // When `true`, fonts that aren't embedded in the PDF document will fallback to a system font. Default value is false.
-          enableXfa: false, // Render Xfa forms if any. Default value is false.
-          viewportScale: 2.0, // The desired scale of PNG viewport. Default value is 1.0.
-          strictPagesToProcess: false, // When `true`, will throw an error if specified page number in pagesToProcess is invalid, otherwise will skip invalid page. Default value is false.
-          verbosityLevel: 0 // Verbosity level. ERRORS: 0, WARNINGS: 1, INFOS: 5. Default value is 0.
-        });
-      buffer = pngPageOutput.map(output => output.content);*/
-      const newBuffer = await convert(1, { responseType: "buffer" })
-      newBuffers.push(newBuffer.buffer);
+
+      const pdf2picOptions = {
+        format: 'png',
+        width: 2550,
+        height: 3300,
+        density: 330,
+        savePath: './output/from-buffer-to-base64',
+      }
+      const convert = convertPdfToPng(buffer, pdf2picOptions)
+      const pages = await convert.bulk(-1, { responseType: "buffer" });
+      console.log(pages)
+      for (const page of pages) {
+        const pngBuffer = Buffer.from(page.buffer, 'base64')
+        newBuffers.push(pngBuffer);
+      }
     }
-      break;
   }
   console.log(newBuffers)
   return newBuffers;
@@ -63,8 +84,13 @@ async function toPdf(buffers, filepath, fileName) {
   }
   averageAspect /= buffers.length;
 
+  let orientation = 'p'
+  if (averageAspect >= 1) {
+    orientation = 'l'
+  }
+  console.log("Average Aspect:", averageAspect)
 
-  const doc = new jsPDF('p', 'mm', [297, 297 * averageAspect]);
+  const doc = new jsPDF(orientation, 'mm', [297, 297 * averageAspect]);
   let firstPage = true;
   for (const buffer of buffers) {
     if (!firstPage) {
@@ -105,7 +131,7 @@ async function toPdf(buffers, filepath, fileName) {
   return fileName + '.pdf';
 }
 
-async function toFile(buffer, filepath, fileName, type) {
+async function toFile(buffer, filepath, fileName, suffix, type) {
   console.log('toFile:', filepath, fileName, type);
   const name = path.parse(fileName).name;
   let extension = null;
@@ -113,37 +139,37 @@ async function toFile(buffer, filepath, fileName, type) {
   switch (type) {
     case 'image/png':
       extension = '.png'
-      await sharp(buffer).png().toFile(filepath + name + extension)
+      await sharp(buffer).png().toFile(filepath + name + suffix + extension)
 
       break;
     case 'image/gif':
       extension = '.gif'
-      await sharp(buffer).gif().toFile(filepath + name + extension);
+      await sharp(buffer).gif().toFile(filepath + name + suffix + extension);
 
       break;
     case 'image/jpeg':
       extension = '.jpg'
-      await sharp(buffer).jpeg().toFile(filepath + name + extension);
+      await sharp(buffer).jpeg().toFile(filepath + name + suffix + extension);
 
       break;
     case 'image/webp':
       extension = '.webp'
-      await sharp(buffer).webp().toFile(filepath + name + extension);
+      await sharp(buffer).webp().toFile(filepath + name + suffix + extension);
 
       break;
     case 'image/avif':
       extension = '.avif'
-      await sharp(buffer).avif().toFile(filepath + name + extension);
+      await sharp(buffer).avif().toFile(filepath + name + suffix + extension);
 
       break;
     case 'image/tiff':
       extension = '.tif'
-      await sharp(buffer).tiff().toFile(filepath + name + extension);
+      await sharp(buffer).tiff().toFile(filepath + name + suffix + extension);
 
       break;
   }
   if (extension) {
-    return name + extension;
+    return name + suffix + extension;
   }
   return null;
 }

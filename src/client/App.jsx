@@ -12,7 +12,6 @@ function App() {
     <>
       <BrowserRouter>
         <Header />
-        <div className='border border-red'>Test</div>
         <Routes>
           <Route path="/gcf" element={<GCF />} />
           <Route path="/imageConverter" element={<ImageConverter />} />

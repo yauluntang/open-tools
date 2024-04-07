@@ -1,5 +1,14 @@
+import styled from "styled-components";
 
-function Button({ label, onClick, ...rest }) {
+const StyledButton = styled.button`
+  background: green;
+  color: white;
+  border-radius: ${props => props.size === 'large' ? '10px' : '4px'};
+  font-size: ${props => props.size === 'large' ? '15px' : '10px'};
+  padding: ${props => props.size === 'large' ? '8px 16px' : '2px 10px'};
+`
+
+function Button({ label, size, children, onClick, ...rest }) {
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -8,11 +17,11 @@ function Button({ label, onClick, ...rest }) {
 
   return (
     <>
-      <button {...rest} onClick={handleClick}>
-        {label}
-      </button>
+      <StyledButton size={size} {...rest} onClick={handleClick}>
+        {children}
+      </StyledButton>
     </>
   )
 }
 
-export default Input
+export default Button

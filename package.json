@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server/main.js -w src/server",
+    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -w src/server",
     "start": "cross-env NODE_ENV=production node src/server/main.js",
     "build": "vite build"
   },
@@ -16,12 +16,17 @@
     "jspdf": "^2.5.1",
     "mime": "^4.0.1",
     "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
     "pdf-to-png-converter": "^3.2.0",
     "pdf2pic": "^3.1.1",
+    "pdftopic": "^1.0.4-alpha",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
+    "react-select": "^5.8.0",
     "sharp": "^0.33.3",
+    "styled-components": "^6.1.8",
     "vite-express": "*"
   },
   "include": [
@@ -41,5 +46,8 @@
     "sass": "^1.74.1",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
+  },
+  "optionalDependencies": {
+    "@img/sharp-win32-x64": "^0.33.3"
   }
 }

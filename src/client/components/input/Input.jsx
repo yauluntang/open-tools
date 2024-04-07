@@ -11,7 +11,7 @@ function Input({ label, onChange, ...rest }) {
         <label>{label}</label>
       </div>
       <div>
-        <input {...rest} onChange={handleChange}></input>
+        <input className="border border-grey rounded-md p-4" {...rest} onChange={handleChange}></input>
       </div>
     </>
   )
