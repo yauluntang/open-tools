@@ -1,9 +1,12 @@
+# open-tools
+
+## Prerequisites
 Node Version 20
+graphicsmagick
+ghostscript
 
-- Installation
-
+## Installation
 yarn
 
-- Running
-
+## Running
 yarn dev

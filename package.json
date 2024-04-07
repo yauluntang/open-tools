@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -w src/server",
-    "start": "cross-env NODE_ENV=production node src/server/main.js",
+    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -p 3000 -w src/server",
+    "start": "cross-env NODE_ENV=production node src/server/main.js -p 80",
     "build": "vite build"
   },
   "dependencies": {
@@ -15,6 +15,7 @@
     "jimp": "^0.22.12",
     "jspdf": "^2.5.1",
     "mime": "^4.0.1",
+    "minimist": "^1.2.8",
     "multer": "^1.4.5-lts.1",
     "pdf-lib": "^1.17.1",
     "pdf-to-png-converter": "^3.2.0",
