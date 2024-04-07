@@ -82,7 +82,7 @@ function ImageConverter() {
 
     console.log("fileType:", thisFiles.type)
     let serial = fileSerial;
-    const thisFilesFiltered = thisFiles.filter(file => fileTypeMap[file.type] && file.size < 10000000).map(file => {
+    const thisFilesFiltered = thisFiles.filter(file => fileTypeMap[file.type] && file.size < 50000000).map(file => {
       serial++;
       return { file, serial, name: file.name, type: file.type, size: file.size }
     });
@@ -217,10 +217,13 @@ function ImageConverter() {
 
     </DragDropContext>
   </div>
-    <div className="flex content-center justify-center items-center">
-      {isLoading ? <div>Loading...</div> : <><Select className="w-96" options={options} defaultValue={options[1]} onChange={(e) => { setFileType(e.value) }} ></Select>
-        <div className="p-4">{fileType}</div>
-        <Button size="large" onClick={submit}> Send </Button></>}
+    <div className={`${!isLoading && 'hidden'}`}>Loading...</div>
+    <div className={`flex content-center justify-center items-center ${isLoading && 'hidden'}`}>
+
+      <Select className="w-96" options={options} defaultValue={options[1]} onChange={(e) => { setFileType(e.value) }} ></Select>
+      <div className="p-4">{fileType}</div>
+      <Button size="large" onClick={submit}> Send </Button>
+
 
 
     </div>
