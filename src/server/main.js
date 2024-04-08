@@ -37,7 +37,7 @@ app.get("/hello", (req, res) => {
 
 const options = {
   key: fs.readFileSync("./.ssl/cert.key"),
-  cert: fs.readFileSync("./.ssl/cert.crt"),
+  cert: fs.readFileSync("./.ssl/OPENTOOL.ME.crt"),
 };
 
 
