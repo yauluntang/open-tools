@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     https: {
-      key: fs.readFileSync('./.ssl/cert.key'),
-      cert: fs.readFileSync('./.ssl/cert.crt')
+      key: fs.readFileSync("./.ssl/OPENTOOL.ME.key"),
+      cert: fs.readFileSync("./.ssl/OPENTOOL.ME.crt"),
     }
   }
 

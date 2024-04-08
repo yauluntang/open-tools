@@ -10,6 +10,7 @@ import { download } from './api/download.js';
 import minimist from 'minimist';
 import ViteExpress from "vite-express";
 import { createServer } from 'vite';
+import path from 'path';
 
 
 const argv = minimist(process.argv.slice(2))
@@ -26,17 +27,20 @@ app.use(cors())
 
 app.post('/send', upload.array('files'), send);
 
+
+app.get("/health", (req, res) => {
+  res.json({ success: true });
+});
+
+
 app.get('/download', download);
 
 app.use(express.static('dist'))
 
-
-app.get("/hello", (req, res) => {
-  res.send("Hello Vite + React!");
-});
+app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
 
 const options = {
-  key: fs.readFileSync("./.ssl/cert.key"),
+  key: fs.readFileSync("./.ssl/OPENTOOL.ME.key"),
   cert: fs.readFileSync("./.ssl/OPENTOOL.ME.crt"),
 };
 
@@ -44,9 +48,9 @@ const options = {
 
 
 http.createServer(app).listen(80);
-https.createServer(options, app).listen(443);
+const server = https.createServer(options, app).listen(443);
 
-/*
+
 let vite = await createServer({
   server: {
     middlewareMode: true,
@@ -54,4 +58,4 @@ let vite = await createServer({
       server,        // <=========  user `server.hmr.server`
     }
   }
-})*/
+})
