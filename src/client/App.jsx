@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.scss'
 import GCF from './pages/GCF'
 import ImageConverter from './pages/ImageConverter'
+import Home from './pages/Home'
+import { Privacy } from './pages/Privacy'
 
 function App() {
 
@@ -13,8 +15,10 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/gcf" element={<GCF />} />
-          <Route path="/imageConverter" element={<ImageConverter />} />
+          <Route path="/image-converter" element={<ImageConverter />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
         <Footer />
       </BrowserRouter>

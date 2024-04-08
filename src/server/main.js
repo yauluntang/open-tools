@@ -1,7 +1,6 @@
 import express from 'express';
 import multer from 'multer';
 import cors from 'cors';
-//import ViteExpress from "vite-express";
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
@@ -9,8 +8,9 @@ import { send } from './api/send.js';
 import { download } from './api/download.js';
 import minimist from 'minimist';
 import ViteExpress from "vite-express";
-import { createServer } from 'vite';
 import path from 'path';
+import cron from 'node-cron';
+import { cleanUpload } from './utils/cleanUpload.js';
 
 
 const argv = minimist(process.argv.slice(2))
@@ -20,7 +20,7 @@ console.log(process.argv)
 console.log(argv)
 
 const app = express()
-const port = argv['p'] || 3002
+const port = argv['p'] || 80
 const upload = multer();
 
 app.use(cors())
@@ -35,9 +35,10 @@ app.get("/health", (req, res) => {
 
 app.get('/download', download);
 
-app.use(express.static('dist'))
+app.get('/clean-up', cleanUpload);
 
-app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
+cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
+
 
 const options = {
   key: fs.readFileSync("./.ssl/OPENTOOL.ME.key"),
@@ -45,17 +46,12 @@ const options = {
 };
 
 
-
-
-http.createServer(app).listen(80);
-const server = https.createServer(options, app).listen(443);
-
-
-let vite = await createServer({
-  server: {
-    middlewareMode: true,
-    hmr: {
-      server,        // <=========  user `server.hmr.server`
-    }
-  }
-})
+if (env === 'production') {
+  app.use(express.static('dist'))
+  app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
+  const server = https.createServer(options, app).listen(443);
+}
+else {
+  const server = http.createServer(app).listen(port);
+  ViteExpress.bind(app, server);
+}

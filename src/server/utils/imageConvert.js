@@ -1,13 +1,11 @@
 import sharp from 'sharp';
 import jimp from 'jimp';
 import path from 'path';
-import { exec, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import { fromBuffer as convertPdfToPng } from 'pdf2pic'
 import { jsPDF } from 'jspdf';
 
 import { PDFDocument } from "pdf-lib";
-import videoshow from 'videoshow';
-import ffmpeg from 'ffmpeg';
 
 export async function mergePdfs(pdfsToMerge) {
   const mergedPdf = await PDFDocument.create();
