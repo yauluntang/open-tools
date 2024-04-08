@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --max-old-space-size=8192 --https src/server/main.js -p 8000 -w src/server",
-    "start": "cross-env NODE_ENV=production node --https src/server/main.js -p 8000",
+    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -p 443 -w src/server",
+    "start": "cross-env NODE_ENV=production node src/server/main.js -p 443",
     "build": "vite build"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
+    "ffmpeg": "^0.0.4",
     "https": "^1.0.0",
     "jimp": "^0.22.12",
     "jspdf": "^2.5.1",
@@ -29,6 +30,7 @@
     "react-select": "^5.8.0",
     "sharp": "^0.33.3",
     "styled-components": "^6.1.8",
+    "videoshow": "^0.1.12",
     "vite-express": "*"
   },
   "include": [

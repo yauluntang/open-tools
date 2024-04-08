@@ -34,7 +34,9 @@ const outputFormat = {
   "WEBP": "image/webp",
   "AVIF": "image/avif",
   "TIF": "image/tiff",
-  "PDF": "application/pdf"
+  "PDF": "application/pdf",
+  "MP4": "video/mp4"
+
 }
 
 const options = Object.keys(outputFormat).map((typeName) => ({ value: outputFormat[typeName], label: typeName }))
@@ -58,19 +60,6 @@ function ImageConverter() {
     overflowY: 'hidden',
     overflowX: 'auto',
 
-  });
-
-  const getItemStyle = (isDragging, draggableStyle) => ({
-    // some basic styles to make the items look a bit nicer
-    userSelect: 'none',
-    padding: grid * 2,
-    margin: `0 ${grid}px 0 0`,
-
-    // change background colour if dragging
-    background: isDragging ? 'lightgreen' : 'grey',
-
-    // styles we need to apply on draggables
-    ...draggableStyle,
   });
 
 

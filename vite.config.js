@@ -5,8 +5,11 @@ import fs from 'fs';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  https: {
-    key: fs.readFileSync('./.ssl/example.com.key'),
-    cert: fs.readFileSync('./.ssl/example.com.csr')
+  server: {
+    https: {
+      key: fs.readFileSync('./.ssl/cert.key'),
+      cert: fs.readFileSync('./.ssl/cert.crt')
+    }
   }
+
 });

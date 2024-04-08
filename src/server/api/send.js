@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import mime from 'mime';
-import { fromFile, toFile, toPdf, mergePdfs } from '../utils/imageConvert.js';
+import { fromFile, toFile, toPdf, mergePdfs, toMp4 } from '../utils/imageConvert.js';
 import { __dirname, uploadFolder } from '../utils/paths.js';
 
 const handleAllPdf = async (req, res) => {
@@ -58,8 +58,9 @@ const handleImageConversion = async (req, res) => {
       res.end(400);
     }
 
+    const fileMainType = fileType.split('/')[0]
 
-    if (fileType !== 'application/pdf') {
+    if (fileMainType === 'image') {
       let index = 1;
 
       for (const buffer of buffers) {
@@ -83,6 +84,13 @@ const handleImageConversion = async (req, res) => {
   }
   if (fileType === 'application/pdf') {
     const newFileName = await toPdf(wholeBuffers, fullPath, firstFileName)
+    const stats = fs.statSync(fullPath + newFileName)
+    const size = stats.size;
+    const type = mime.getType(fullPath + newFileName)
+    outputFileList.push({ path: timeStamp + "/", name: newFileName, size, type })
+  }
+  else if (fileType === 'video/mp4') {
+    const newFileName = await toMp4(wholeBuffers, fullPath, firstFileName)
     const stats = fs.statSync(fullPath + newFileName)
     const size = stats.size;
     const type = mime.getType(fullPath + newFileName)

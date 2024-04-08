@@ -1,11 +1,13 @@
 import sharp from 'sharp';
 import jimp from 'jimp';
 import path from 'path';
-
+import { exec, execSync } from 'child_process';
 import { fromBuffer as convertPdfToPng } from 'pdf2pic'
 import { jsPDF } from 'jspdf';
 
 import { PDFDocument } from "pdf-lib";
+import videoshow from 'videoshow';
+import ffmpeg from 'ffmpeg';
 
 export async function mergePdfs(pdfsToMerge) {
   const mergedPdf = await PDFDocument.create();
@@ -30,6 +32,84 @@ export async function mergePdfs(pdfsToMerge) {
   });
 
   return (await mergedPdf.save({ updateFieldAppearances: false })).buffer;
+}
+
+export async function toMp4(buffers, filepath, fileName) {
+
+  return new Promise(async (res, rej) => {
+
+
+
+    let i = 0;
+    const name = path.parse(fileName).name;
+    let fileNames = [];
+    for (let buffer of buffers) {
+      let suffix = `_${i}`;
+      let extension = '.jpg';
+      let fileName = filepath + name + suffix + extension;
+      const image = sharp(buffer);
+      const { width: imageWidth, height: imageHeight } = await image.metadata();
+
+      await sharp(buffer).extract({ left: 0, top: 0, width: imageWidth, height: imageHeight - 50 }).resize({
+        width: 1280,
+        height: 720,
+        fit: 'contain',
+      }).jpeg({ quality: 80 }).toFile(fileName);
+      fileNames.push(fileName)
+      i++;
+    }
+
+    const prompt = 'ffmpeg -framerate 0.5 -i ' + filepath + name + '_%d.jpg -c:v libx264 -r 30 ' + filepath + 'video.mp4';
+
+    console.log(prompt)
+
+    execSync(prompt);
+
+    res('video.mp4');
+
+    /*
+    const ff = ffmpeg(filepath + 'video.mp4');
+
+
+    for (let fileName of fileNames) {
+      ff.input(fileName);
+    }
+
+    res(filepath + 'video.mp4');
+*/
+
+    /*
+        var videoOptions = {
+          fps: 25,
+          loop: 5, // seconds
+          transition: true,
+          transitionDuration: 1, // seconds
+          videoBitrate: 1024,
+          videoCodec: 'libx264',
+          size: '640x?',
+          audioBitrate: '128k',
+          audioChannels: 2,
+          format: 'mpeg',
+          pixelFormat: 'yuv420p'
+        }
+    
+        videoshow(fileNames)
+    
+          .save(filepath + 'video.mp4')
+          .on('start', function (command) {
+            console.log('ffmpeg process started:', command)
+          })
+          .on('error', function (err, stdout, stderr) {
+            console.error('Error:', err)
+            console.error('ffmpeg stderr:', stderr)
+            rej();
+          })
+          .on('end', function (output) {
+    
+            res(filepath + 'video.mp4');
+          })*/
+
+  })
 }
 
 
