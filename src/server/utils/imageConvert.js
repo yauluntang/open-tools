@@ -11,7 +11,8 @@ export async function mergePdfs(pdfsToMerge) {
   const mergedPdf = await PDFDocument.create();
 
   const createInnerPromise = async (arrayBuffer) => {
-    const pdf = await PDFDocument.load(arrayBuffer);
+    const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+
     return await mergedPdf.copyPages(pdf, pdf.getPageIndices());
   };
 
@@ -28,7 +29,7 @@ export async function mergePdfs(pdfsToMerge) {
     });
   });
 
-  return (await mergedPdf.save()).buffer;
+  return (await mergedPdf.save({ updateFieldAppearances: false })).buffer;
 }
 
 

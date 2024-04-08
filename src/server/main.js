@@ -7,6 +7,7 @@ import { download } from './api/download.js';
 import minimist from 'minimist';
 
 const argv = minimist(process.argv.slice(2))
+const env = process.env.NODE_ENV || 'development';
 
 console.log(process.argv)
 console.log(argv)

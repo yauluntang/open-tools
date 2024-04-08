@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -p 3000 -w src/server",
-    "start": "cross-env NODE_ENV=production node src/server/main.js -p 80",
+    "dev": "nodemon --max-old-space-size=8192 --https src/server/main.js -p 8000 -w src/server",
+    "start": "cross-env NODE_ENV=production node --https src/server/main.js -p 8000",
     "build": "vite build"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
+    "https": "^1.0.0",
     "jimp": "^0.22.12",
     "jspdf": "^2.5.1",
     "mime": "^4.0.1",
