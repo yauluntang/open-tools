@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -p 443 -w src/server",
+    "dev": "nodemon --max-old-space-size=8192 src/server/main.js -p 80 -w src/server",
     "start": "cross-env NODE_ENV=production node src/server/main.js -p 443",
     "build": "vite build"
   },

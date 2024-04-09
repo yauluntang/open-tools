@@ -18,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gcf" element={<GCF />} />
           <Route path="/image-converter" element={<ImageConverter />} />
+          <Route path="/image-crop-tovideo" element={<ImageConverter croptovideo={true} />} />
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
         <Footer />

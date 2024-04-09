@@ -29,6 +29,7 @@ function Header() {
           <ul className={`flex content-center items-center`} style={{ height: '50px', display: 'flex' }}>
             <Li><StyledLink to="gcf">GCF</StyledLink></Li>
             <Li><StyledLink to="image-converter">Image Converter</StyledLink></Li>
+            <Li><StyledLink to="image-crop-tovideo">Crop Image to Video</StyledLink></Li>
           </ul>
         </div>
       </div>

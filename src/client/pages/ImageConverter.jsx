@@ -2,18 +2,12 @@ import './ImageConverter.scss';
 import fileImage from '../assets/file.svg';
 import { useCallback, useEffect, useState } from 'react';
 import Button from '../components/input/Button';
+import Input from '../components/input/Input';
 import Select from 'react-select'
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import { StrictModeDroppable } from '../utils/StrictModeDroppable';
 import { formatFileSize } from '../utils/formatFileSize';
 
-function swap(json) {
-  var ret = {};
-  for (var key in json) {
-    ret[json[key]] = key;
-  }
-  return ret;
-}
 
 const fileTypeMap = {
   "image/jpeg": "JPG",
@@ -25,7 +19,8 @@ const fileTypeMap = {
   "image/raw": "RAW",
   "image/bmp": "BMP",
   "image/webp": "WEBP",
-  "application/pdf": "PDF"
+  "application/pdf": "PDF",
+  "video/mp4": "MP4"
 }
 
 const outputFormat = {
@@ -43,13 +38,40 @@ const options = Object.keys(outputFormat).map((typeName) => ({ value: outputForm
 
 const grid = 8;
 
-function ImageConverter() {
+function ImageConverter({ croptovideo }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [fileType, setFileType] = useState('image/png');
   const [downloadFiles, setDownloadFiles] = useState([]);
   const [fileSerial, setFileSerial] = useState(0);
+
+
+  const [leftCrop, setLeftCrop] = useState(0);
+  const [rightCrop, setRightCrop] = useState(0);
+  const [topCrop, setTopCrop] = useState(0);
+  const [bottomCrop, setBottomCrop] = useState(0);
+
+
+  useEffect(() => {
+
+    if (croptovideo) {
+      setFileType('video/mp4');
+      setBottomCrop(50);
+      setTopCrop(0);
+      setLeftCrop(0);
+      setRightCrop(0);
+    }
+
+    else {
+      setFileType('image/png');
+      setBottomCrop(0);
+      setTopCrop(0);
+      setLeftCrop(0);
+      setRightCrop(0);
+    }
+  }, [croptovideo])
+
 
   const getListStyle = isDraggingOver => ({
     background: isDraggingOver ? 'lightblue' : 'lightgrey',
@@ -135,6 +157,10 @@ function ImageConverter() {
       formData.append("files", file.file);
     }
     formData.set("fileType", fileType)
+    formData.set("leftCrop", leftCrop)
+    formData.set("rightCrop", rightCrop)
+    formData.set("topCrop", topCrop)
+    formData.set("bottomCrop", bottomCrop)
 
     try {
       setIsLoading(true);
@@ -153,7 +179,15 @@ function ImageConverter() {
       setIsLoading(false);
       console.error("Something went wrong!", error);
     }
-  }, [files, fileType, setDownloadFiles, setIsLoading])
+  }, [
+    files,
+    fileType,
+    leftCrop,
+    rightCrop,
+    topCrop,
+    bottomCrop,
+    setDownloadFiles,
+    setIsLoading])
 
 
   const handleDownload = (file) => (e) => {
@@ -165,6 +199,22 @@ function ImageConverter() {
     const newFiles = [...files];
     newFiles.splice(index, 1);
     setFiles(newFiles)
+  }, [setFiles, files])
+
+  const clearQueue = useCallback(() => {
+    setFiles([]);
+  }, [setFiles, files])
+
+  const handleUserInputFiles = useCallback((e) => {
+    console.log(e.target.files)
+
+    let thisFiles = [];
+
+    for (let i = 0; i < e.target.files.length; i++) {
+      thisFiles.push(e.target.files[i])
+    }
+    handleFiles(thisFiles)
+
   }, [setFiles, files])
 
   return <div id="imageConverter"><div
@@ -207,12 +257,18 @@ function ImageConverter() {
     </DragDropContext>
   </div>
     <div className={`${!isLoading && 'hidden'}`}>Loading...</div>
+
+
     <div className={`flex content-center justify-center items-center ${isLoading && 'hidden'}`}>
 
-      <Select className="w-96" options={options} defaultValue={options[1]} onChange={(e) => { setFileType(e.value) }} ></Select>
+      <input type="file" multiple onChange={handleUserInputFiles}></input>
+      <Select className="w-96" options={options} value={
+        options.filter(option =>
+          option.value === fileType)
+      } onChange={(e) => { setFileType(e.value) }} defaultValue={fileType || 'Select'}></Select>
       <div className="p-4">{fileType}</div>
       <Button size="large" onClick={submit}> Send </Button>
-
+      <Button className="ml-4 mr-4" type="danger" size="large" onClick={clearQueue}> Clear Queue </Button>
 
 
     </div>
@@ -226,6 +282,13 @@ function ImageConverter() {
 
           <Button onClick={handleDownload(file)} >Download</Button>
         </div>)}
+    </div>
+
+    <div>
+      <Input label="Left Crop" type="number" value={leftCrop} onChange={setLeftCrop} />
+      <Input label="Right Crop" type="number" value={rightCrop} onChange={setRightCrop} />
+      <Input label="Top Crop" type="number" value={topCrop} onChange={setTopCrop} />
+      <Input label="Bottom Crop" type="number" value={bottomCrop} onChange={setBottomCrop} />
     </div>
   </div >
 }

@@ -32,7 +32,17 @@ const handleImageConversion = async (req, res) => {
   console.log('Handle Image Conversion')
   const timeStamp = new Date().getTime();
   const fullPath = __dirname + uploadFolder + timeStamp + "/";
-  const fileType = req.body.fileType;
+  const { fileType, leftCrop, rightCrop, topCrop, bottomCrop } = req.body;
+
+  console.log("Body:", req.body)
+  const crops = {
+    leftCrop: parseInt(leftCrop, 10),
+    rightCrop: parseInt(rightCrop, 10),
+    topCrop: parseInt(topCrop, 10),
+    bottomCrop: parseInt(bottomCrop, 10)
+  };
+
+  console.log("Crops:", crops)
 
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
@@ -68,7 +78,7 @@ const handleImageConversion = async (req, res) => {
         if (buffers.length > 1) {
           suffix = '_' + index;
         }
-        const newFileName = await toFile(buffer, fullPath, originalFile, suffix, fileType);
+        const newFileName = await toFile(buffer, fullPath, originalFile, suffix, fileType, crops);
         console.log(newFileName)
         if (!newFileName) {
           console.error('Invalid Image Type')
@@ -90,7 +100,7 @@ const handleImageConversion = async (req, res) => {
     outputFileList.push({ path: timeStamp + "/", name: newFileName, size, type })
   }
   else if (fileType === 'video/mp4') {
-    const newFileName = await toMp4(wholeBuffers, fullPath, firstFileName)
+    const newFileName = await toMp4(wholeBuffers, fullPath, firstFileName, crops)
     const stats = fs.statSync(fullPath + newFileName)
     const size = stats.size;
     const type = mime.getType(fullPath + newFileName)

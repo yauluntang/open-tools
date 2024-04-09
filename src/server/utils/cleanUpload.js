@@ -13,7 +13,7 @@ export const cleanUpload = async (req, res) => {
     console.log('clean up scheduled!');
     const fullPath = __dirname + uploadFolder;
     const directories = await getDirectories(fullPath)
-    console.log(directories)
+
     const oneHourBefore = new Date(new Date().getTime() - ONE_HOUR);
     const cleanedDirectory = [];
 
