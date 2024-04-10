@@ -8,10 +8,10 @@ function Input({ label, onChange, ...rest }) {
   return (
     <>
       <div>
-        <label>{label}</label>
+        <label className="text-sm">{label}</label>
       </div>
       <div>
-        <input className="border border-grey rounded-md p-4" {...rest} onChange={handleChange}></input>
+        <input className="border border-grey rounded-md p-1" {...rest} onChange={handleChange}></input>
       </div>
     </>
   )

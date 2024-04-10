@@ -7,6 +7,7 @@ import GCF from './pages/GCF'
 import ImageConverter from './pages/ImageConverter'
 import Home from './pages/Home'
 import { Privacy } from './pages/Privacy'
+import TextGenerator from './pages/TextGenerator'
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/gcf" element={<GCF />} />
           <Route path="/image-converter" element={<ImageConverter />} />
           <Route path="/image-crop-tovideo" element={<ImageConverter croptovideo={true} />} />
+          <Route path="/text-generator" element={<TextGenerator />} />
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
         <Footer />

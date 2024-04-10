@@ -30,6 +30,7 @@ function Header() {
             <Li><StyledLink to="gcf">GCF</StyledLink></Li>
             <Li><StyledLink to="image-converter">Image Converter</StyledLink></Li>
             <Li><StyledLink to="image-crop-tovideo">Crop Image to Video</StyledLink></Li>
+            <Li><StyledLink to="text-generator">Text Generator</StyledLink></Li>
           </ul>
         </div>
       </div>

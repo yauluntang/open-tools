@@ -50,6 +50,7 @@ if (env === 'production') {
   app.use(express.static('dist'))
   app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
   const server = https.createServer(options, app).listen(443);
+  http.createServer(app).listen(80);
 }
 else {
   const server = http.createServer(app).listen(port);

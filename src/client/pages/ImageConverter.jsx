@@ -7,7 +7,7 @@ import Select from 'react-select'
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import { StrictModeDroppable } from '../utils/StrictModeDroppable';
 import { formatFileSize } from '../utils/formatFileSize';
-
+import imageConverterImage from '../assets/imageconverter-min.png';
 
 const fileTypeMap = {
   "image/jpeg": "JPG",
@@ -217,45 +217,48 @@ function ImageConverter({ croptovideo }) {
 
   }, [setFiles, files])
 
-  return <div id="imageConverter"><div
-    className="dropZone"
-    onDrop={dropHandler}
-    onDragOver={dragOverHandler}>
-    <p className="absolute p-4 grey select-none">Drag one or more files to this <i>drop zone</i>.</p>
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="fileList">
-        <StrictModeDroppable droppableId="droppable" direction="horizontal">{(provided, snapshot) => (
-          <div {...provided.droppableProps}
-            ref={provided.innerRef}
-            style={getListStyle(snapshot.isDraggingOver)}>
-            {Boolean(files) && files.length > 0 && files.map((file, index) =>
+  return <div id="imageConverter">
+
+    <div className='flex content-center justify-center items-center'><img style={{ width: '150px' }} src={imageConverterImage}></img> <h1>Image Converter</h1></div>
+    <div
+      className="dropZone"
+      onDrop={dropHandler}
+      onDragOver={dragOverHandler}>
+      <p className="absolute p-4 grey select-none">Drag one or more files to this <i>drop zone</i>.</p>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="fileList">
+          <StrictModeDroppable droppableId="droppable" direction="horizontal">{(provided, snapshot) => (
+            <div {...provided.droppableProps}
+              ref={provided.innerRef}
+              style={getListStyle(snapshot.isDraggingOver)}>
+              {Boolean(files) && files.length > 0 && files.map((file, index) =>
 
 
-              <Draggable key={`droppable-${file.serial}`} id={`droppable-${file.serial}`} draggableId={`droppable-${file.serial}`} index={index}>
-                {(provided, snapshot) => (
+                <Draggable key={`droppable-${file.serial}`} id={`droppable-${file.serial}`} draggableId={`droppable-${file.serial}`} index={index}>
+                  {(provided, snapshot) => (
 
-                  <div className="fileBlock" ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}>
-                    <img draggable="false" onMouseDown={() => false} onDragStart={() => false} onDrop={() => false} className="imageBlock" src={fileImage}></img>
-                    <span className="fileTypeBlock">{fileTypeMap[file.type]}</span>
-                    <span className="fileNameBlock">{file.name}</span>
-                    <span className="fileSizeBlock">{formatFileSize(file.size)}</span>
-                    <span onClick={handleDelete(index)} className="deleteButtonBlock">X</span>
-                  </div>
+                    <div className="fileBlock" ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}>
+                      <img draggable="false" onMouseDown={() => false} onDragStart={() => false} onDrop={() => false} className="imageBlock" src={fileImage}></img>
+                      <span className="fileTypeBlock">{fileTypeMap[file.type]}</span>
+                      <span className="fileNameBlock">{file.name}</span>
+                      <span className="fileSizeBlock">{formatFileSize(file.size)}</span>
+                      <span onClick={handleDelete(index)} className="deleteButtonBlock">X</span>
+                    </div>
 
-                )}
+                  )}
 
-              </Draggable>
+                </Draggable>
 
-            )}
-          </div>
-        )}
-        </StrictModeDroppable>
-      </div>
+              )}
+            </div>
+          )}
+          </StrictModeDroppable>
+        </div>
 
-    </DragDropContext>
-  </div>
+      </DragDropContext>
+    </div>
     <div className={`${!isLoading && 'hidden'}`}>Loading...</div>
 
 
