@@ -1,0 +1,85 @@
+#imageConverter {
+  padding: 20px;
+
+  .dropZone {
+    border: 3px dotted rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 200px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .imageBlock {
+
+    user-drag: none;
+    user-select: none;
+    display: block;
+
+    border-radius: 3px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .fileBlock {
+    user-select: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    border-radius: 10px;
+    background-color: rgba(240, 240, 240, 0.9);
+    box-shadow: 2px 2px 6px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin: 5px;
+    width: 140px;
+    height: 100px;
+  }
+
+  .fileTypeBlock {
+    position: absolute;
+    background-color: black;
+    border-radius: 5px;
+    color: white;
+    bottom: 45px;
+    left: 30px;
+    padding: 1px 10px;
+  }
+
+  .fileList {
+    display: flex;
+  }
+
+  .fileNameBlock {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    height: 17px;
+    text-overflow: ellipsis;
+  }
+
+  .fileSizeBlock {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    height: 17px;
+    text-overflow: ellipsis;
+  }
+
+  .deleteButtonBlock {
+    cursor: pointer;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    font-size: 10px;
+    color: white;
+    border-radius: 10px;
+    padding: 2px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+}

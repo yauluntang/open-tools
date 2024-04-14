@@ -11,6 +11,7 @@ import ViteExpress from "vite-express";
 import path from 'path';
 import cron from 'node-cron';
 import { cleanUpload } from './utils/cleanUpload.js';
+import { convertFont } from './api/convertFont.js';
 
 
 const argv = minimist(process.argv.slice(2))
@@ -26,6 +27,8 @@ const upload = multer();
 app.use(cors())
 
 app.post('/send', upload.array('files'), send);
+
+app.post('/convertFont', upload.array('files'), convertFont);
 
 
 app.get("/health", (req, res) => {

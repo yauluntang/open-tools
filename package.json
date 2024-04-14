@@ -9,12 +9,14 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
     "ffmpeg": "^0.0.4",
     "https": "^1.0.0",
     "jimp": "^0.22.12",
+    "json-loader": "^0.5.7",
     "jspdf": "^2.5.1",
     "mime": "^4.0.1",
     "minimist": "^1.2.8",
@@ -29,8 +31,11 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "react-select": "^5.8.0",
+    "sanitize-html": "^2.13.0",
     "sharp": "^0.33.3",
     "styled-components": "^6.1.8",
+    "ttf2woff2": "^5.0.0",
+    "ttfinfo": "^0.2.0",
     "videoshow": "^0.1.12",
     "vite-express": "*"
   },

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import logo from "../../assets/logo-min.png"
 import styled from "styled-components"
+import { AppRoutes } from "../../App"
 const Ul = styled.ul`
   display: flex
 `
@@ -27,10 +28,7 @@ function Header() {
             <div className={`text-white mr-10`}>opentool.me</div>
           </Link>
           <ul className={`flex content-center items-center`} style={{ height: '50px', display: 'flex' }}>
-            <Li><StyledLink to="gcf">GCF</StyledLink></Li>
-            <Li><StyledLink to="image-converter">Image Converter</StyledLink></Li>
-            <Li><StyledLink to="image-crop-tovideo">Crop Image to Video</StyledLink></Li>
-            <Li><StyledLink to="text-generator">Text Generator</StyledLink></Li>
+            {AppRoutes.map((route, index) => <Li key={index}><StyledLink to={route.path}>{route.name}</StyledLink></Li>)}
           </ul>
         </div>
       </div>

@@ -1,0 +1,14 @@
+{
+  "title": "Lesson 1 - HTML 5 Basic",
+  "descriptions": [
+    "Hello everyone, and welcome to our session on HTML! Today, we're going to dive into the basics of HTML tags, focusing on the structure of an HTML document. Whether you're a beginner looking to understand web development or just curious about how websites are built, you're in the right place. ",
+    "HTML stands for HyperText Markup Language. It's the standard markup language used to create web pages. HTML describes the structure of a webpage semantically and originally included cues for the appearance of the document.",
+    "HTML is made up of elements or tags. These tags tell the web browser how to display the content on your screen. Each tag has a specific purpose and meaning, and today we’ll focus on some of the most fundamental ones that every webpage uses.",
+    "Let's start by looking at a basic HTML document structure. There are a few essential tags that every HTML document should have. I'll explain each one as we go through them.",
+    "Inside the <html> tag, we first encounter the <head> tag. This section of your page holds essential information that is not seen directly on the web page. It typically includes the title of your document, meta tags, and links to stylesheets or scripts. The <title> tag, which also goes inside the <head>, sets the title of the web page as it appears in the browser's title bar or tab",
+    "Following the <head> is the <body> tag. This is where all the content that you want to show to the users on the webpage is placed. Anything you want to display on the page, like paragraphs, images, links, and other content, goes here.",
+    "In summary, these tags form the backbone of any HTML document. Understanding what each part does will help you tremendously as you begin to delve deeper into web development. Always ensure your HTML structure is clean and correctly nested to avoid issues in how your page is displayed."
+  ],
+  "exampleCode": "<html>\n<head>\n<title>Your Page Title</title>\n</head>\n<body>\n<p>Hello, world!</p>\n</body></html>",
+  "exampleCss": ""
+}
