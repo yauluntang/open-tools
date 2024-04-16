@@ -5,7 +5,7 @@ import fileImage from '../../assets/file.svg';
 
 import Button from "../input/Button";
 import { formatFileSize } from "../../utils/formatFileSize";
-import { alphabeticSort, fileNameSort, semanticSort } from "../../utils/semanticSort";
+import { alphabeticSort, fileNameSort, semanticSort, shuffleArray } from "../../utils/semanticSort";
 
 const getFileExtension = (filename) => (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
 
@@ -152,15 +152,22 @@ const FileDragDrop = ({ allowableFileTypes, fileMaxSize = 50000000, onChange }) 
 
   const doSemanticSort = useCallback(() => {
     const newSortFile = [...files];
-    newSortFile.sort(fileNameSort(semanticSort));
+    fileNameSort(newSortFile, semanticSort);
     setFiles(newSortFile)
   }, [files])
 
   const doAlphabeticSort = useCallback(() => {
     const newSortFile = [...files];
-    newSortFile.sort(fileNameSort(alphabeticSort));
+    fileNameSort(newSortFile, alphabeticSort);
     setFiles(newSortFile)
   }, [files])
+
+  const doShuffle = useCallback(() => {
+    const newSortFile = [...files];
+    shuffleArray(newSortFile);
+    setFiles(newSortFile)
+  }, [files])
+
 
   useEffect(() => {
     onChange(files);
@@ -217,6 +224,7 @@ const FileDragDrop = ({ allowableFileTypes, fileMaxSize = 50000000, onChange }) 
 
     <Button className="ml-4 mr-4" type="primary" size="large" onClick={doSemanticSort}> Sort Semantic </Button>
     <Button className="ml-4 mr-4" type="primary" size="large" onClick={doAlphabeticSort}> Sort Alphabetic </Button>
+    <Button className="ml-4 mr-4" type="primary" size="large" onClick={doShuffle}> Shuffle </Button>
   </div>
 }
 
