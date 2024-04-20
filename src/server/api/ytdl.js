@@ -2,7 +2,7 @@
 import { __dirname, uploadFolder } from '../utils/paths.js';
 import _ from 'lodash';
 import fs from 'fs';
-import ytdl from 'ytdl-core';
+import ytdl from '@distube/ytdl-core';
 import mime from 'mime';
 
 const writeToLocalDisk = (stream, path) => {

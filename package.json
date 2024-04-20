@@ -9,6 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.13.3",
     "@monaco-editor/react": "^4.6.0",
     "axios": "^1.6.8",
     "body-parser": "^1.20.2",
@@ -41,8 +42,7 @@
     "ttfinfo": "^0.2.0",
     "uuid": "^9.0.1",
     "videoshow": "^0.1.12",
-    "vite-express": "*",
-    "ytdl-core": "^4.11.5"
+    "vite-express": "*"
   },
   "include": [
     "src"
