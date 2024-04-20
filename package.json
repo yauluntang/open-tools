@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "axios": "^1.6.8",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
@@ -18,6 +20,7 @@
     "jimp": "^0.22.12",
     "json-loader": "^0.5.7",
     "jspdf": "^2.5.1",
+    "lodash": "^4.17.21",
     "mime": "^4.0.1",
     "minimist": "^1.2.8",
     "multer": "^1.4.5-lts.1",
@@ -36,8 +39,10 @@
     "styled-components": "^6.1.8",
     "ttf2woff2": "^5.0.0",
     "ttfinfo": "^0.2.0",
+    "uuid": "^9.0.1",
     "videoshow": "^0.1.12",
-    "vite-express": "*"
+    "vite-express": "*",
+    "ytdl-core": "^4.11.5"
   },
   "include": [
     "src"

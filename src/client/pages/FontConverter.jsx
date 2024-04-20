@@ -37,7 +37,7 @@ function FontConverter({ croptovideo }) {
 
     try {
       setIsLoading(true);
-      const response = await fetch("/convertFont", {
+      const response = await fetch("/api/convertFont", {
         headers: {
           'Accept': 'application/json'
         },
@@ -60,7 +60,7 @@ function FontConverter({ croptovideo }) {
 
 
   const handleDownload = (file) => (e) => {
-    window.open('/download?file=' + encodeURI(file.path + file.name))
+    window.open('/api/download?file=' + encodeURI(file.path + file.name))
   }
 
   return <div id="imageConverter">
@@ -84,17 +84,8 @@ function FontConverter({ croptovideo }) {
 
 
     </div>
-    <div className="fileList flex">
-      {Boolean(downloadFiles) && downloadFiles.length > 0 && downloadFiles.map((file, index) =>
-        <div key={index} className="fileBlock">
-          <img draggable="false" onMouseDown={() => false} onDragStart={() => false} onDrop={() => false} className="imageBlock" src={fileImage}></img>
-          <span className="fileTypeBlock">{fileTypeMap[file.type]}</span>
-          <span className="fileNameBlock">{file.name}</span>
-          <span className="fileSizeBlock">{formatFileSize(file.size)}</span>
+    <FileDownload downloadFiles={downloadFiles} />
 
-          <Button onClick={handleDownload(file)} >Download</Button>
-        </div>)}
-    </div>
 
 
   </div >

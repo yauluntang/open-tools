@@ -7,11 +7,11 @@ function Input({ label, onChange, ...rest }) {
 
   return (
     <>
-      <div>
+      <div className="w-100">
         <label className="text-sm">{label}</label>
       </div>
-      <div>
-        <input className="border border-grey rounded-md p-1" {...rest} onChange={handleChange}></input>
+      <div className="w-100">
+        <input style={{ width: '100%' }} className="w-100 border border-grey rounded-md p-1" {...rest} onChange={handleChange}></input>
       </div>
     </>
   )

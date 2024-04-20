@@ -9,6 +9,7 @@ import { StrictModeDroppable } from '../utils/StrictModeDroppable';
 import { formatFileSize } from '../utils/formatFileSize';
 import imageConverterImage from '../assets/imageconverter-min.png';
 import { FileDragDrop } from '../components/layout/FileDragDrop';
+import { FileDownload } from '../components/layout/FileDownload';
 
 const fileTypeMap = {
   "image/jpeg": "JPG",
@@ -90,7 +91,7 @@ function ImageConverter({ croptovideo }) {
 
     try {
       setIsLoading(true);
-      const response = await fetch("/send", {
+      const response = await fetch("/api/send", {
         headers: {
           'Accept': 'application/json'
         },
@@ -117,7 +118,7 @@ function ImageConverter({ croptovideo }) {
 
 
   const handleDownload = (file) => (e) => {
-    window.open('/download?file=' + encodeURI(file.path + file.name))
+    window.open('/api/download?file=' + encodeURI(file.path + file.name))
   }
 
   return <div id="imageConverter">
@@ -141,17 +142,7 @@ function ImageConverter({ croptovideo }) {
 
 
     </div>
-    <div className="fileList flex">
-      {Boolean(downloadFiles) && downloadFiles.length > 0 && downloadFiles.map((file, index) =>
-        <div key={index} className="fileBlock">
-          <img draggable="false" onMouseDown={() => false} onDragStart={() => false} onDrop={() => false} className="imageBlock" src={fileImage}></img>
-          <span className="fileTypeBlock">{fileTypeMap[file.type]}</span>
-          <span className="fileNameBlock">{file.name}</span>
-          <span className="fileSizeBlock">{formatFileSize(file.size)}</span>
-
-          <Button onClick={handleDownload(file)} >Download</Button>
-        </div>)}
-    </div>
+    <FileDownload downloadFiles={downloadFiles} />
 
     <div>
       <Input label="Left Crop" type="number" value={leftCrop} onChange={setLeftCrop} />

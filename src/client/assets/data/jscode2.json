@@ -1,0 +1,19 @@
+{
+  "title": "Lesson 2 - Javascript Basic",
+  "descriptions": [
+    "Write a function to check if Palindrome"
+  ],
+  "example": "<html>\n<head>\n<title>Your Page Title</title>\n</head>\n<body>\n<p>Hello, world!</p>\n</body></html>",
+  "exampleJs": "checkIfPalindrome = function(s) {let left = 0;\nlet right = s.length - 1;\nwhile (left < right) {\n        if (s[left] != s[right]) {\n            return false;\n        }\n                left++;\n        right--;\n    }\nreturn true;  }",
+  "functionName": "checkIfPalindrome",
+  "testCases": [
+    {
+      "input": "abcdedcba",
+      "output": true
+    },
+    {
+      "input": "apple",
+      "output": false
+    }
+  ]
+}

@@ -12,7 +12,9 @@ import path from 'path';
 import cron from 'node-cron';
 import { cleanUpload } from './utils/cleanUpload.js';
 import { convertFont } from './api/convertFont.js';
-
+import { runnode } from './api/runNode.js';
+import bodyParser from 'body-parser';
+import { youtubedownload } from './api/ytdl.js';
 
 const argv = minimist(process.argv.slice(2))
 const env = process.env.NODE_ENV || 'development';
@@ -25,20 +27,18 @@ const port = argv['p'] || 80
 const upload = multer();
 
 app.use(cors())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/send', upload.array('files'), send);
-
-app.post('/convertFont', upload.array('files'), convertFont);
-
-
-app.get("/health", (req, res) => {
+app.post('/api/send', upload.array('files'), send);
+app.post('/api/convertFont', upload.array('files'), convertFont);
+app.get("/api/health", (req, res) => {
   res.json({ success: true });
 });
-
-
-app.get('/download', download);
-
-app.get('/clean-up', cleanUpload);
+app.get('/api/download', download);
+app.get('/api/clean-up', cleanUpload);
+app.post('/api/runnode', runnode);
+app.post('/api/ytdl', youtubedownload);
 
 cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
 

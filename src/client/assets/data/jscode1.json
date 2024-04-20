@@ -1,0 +1,25 @@
+{
+  "title": "Lesson 1 - Javascript Basic",
+  "descriptions": [
+    "Write a function to add two parameters"
+  ],
+  "example": "<html>\n<head>\n<title>Your Page Title</title>\n</head>\n<body>\n<p>Hello, world!</p>\n</body></html>",
+  "exampleJs": "function sum(a,b) {\n\n\n}",
+  "functionName": "sum",
+  "testCases": [
+    {
+      "input": [
+        1,
+        2
+      ],
+      "output": 3
+    },
+    {
+      "input": [
+        -4,
+        -3
+      ],
+      "output": -7
+    }
+  ]
+}
