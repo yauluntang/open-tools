@@ -7,6 +7,7 @@ import Select from 'react-select'
 import { formatFileSize } from '../utils/formatFileSize';
 import imageConverterImage from '../assets/imageconverter-min.png';
 import { FileDragDrop } from '../components/layout/FileDragDrop';
+import { FileDownload } from '../components/layout/FileDownload';
 
 const fileTypeMap = {
   "font/ttf": "TTF"
