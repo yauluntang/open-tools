@@ -1,9 +1,10 @@
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Input from '../../components/input/Input';
 import Button from '../../components/input/Button';
 import SockJS from 'sockjs-client';
 import moment from 'moment';
+import axios from 'axios';
 
 
 const sock = new SockJS('/api/echo');
@@ -40,6 +41,16 @@ export const Chat = () => {
     setText('')
   }, [text, setText])
 
+  useEffect(() => {
+    const fetch = async () => {
+      const responseText = await axios.get("/api/message");
+      console.log(responseText.data)
+
+      setMessage(responseText.data);
+
+    }
+    fetch();
+  }, [])
 
   return <div style={{ padding: '50px' }}>
     <div style={{ height: '500px', padding: '25px', background: 'white' }}>

@@ -16,6 +16,9 @@ import { runnode } from './api/runNode.js';
 import bodyParser from 'body-parser';
 import { youtubedownload } from './api/ytdl.js';
 import sockjs from 'sockjs';
+import { initDb } from './model/init.js';
+import { Message } from './model/message.js';
+import { message } from './api/message.js';
 
 
 const argv = minimist(process.argv.slice(2))
@@ -43,11 +46,16 @@ app.get('/api/clean-up', cleanUpload);
 app.post('/api/runnode', runnode);
 app.post('/api/ytdl', youtubedownload);
 
+
+app.get('/api/message', message);
+
 cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
 
 const echo = sockjs.createServer();
 
 const clients = {};
+
+initDb();
 
 const broadcast = (message) => {
   // iterate through each client in clients object
@@ -57,16 +65,21 @@ const broadcast = (message) => {
   }
 }
 
-echo.on('connection', function (conn) {
+echo.on('connection', (conn) => {
 
   clients[conn.id] = conn;
 
-  conn.on('data', function (message) {
+  conn.on('data', async (message) => {
+    const messageObject = JSON.parse(message)
     console.log(message);
+    messageObject.timeStamp = new Date().getTime();
+
+    await Message.create(messageObject);
+
     broadcast(message);
   });
 
-  conn.on('close', function () {
+  conn.on('close', () => {
     delete clients[conn.id];
   });
 });
