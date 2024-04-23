@@ -46,11 +46,29 @@ app.post('/api/ytdl', youtubedownload);
 cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
 
 const echo = sockjs.createServer();
+
+const clients = {};
+
+const broadcast = (message) => {
+  // iterate through each client in clients object
+  for (var client in clients) {
+    // send the message to that client
+    clients[client].write(message);
+  }
+}
+
 echo.on('connection', function (conn) {
+
+  clients[conn.id] = conn;
+
   conn.on('data', function (message) {
-    conn.write(message);
+    console.log(message);
+    broadcast(message);
   });
-  conn.on('close', function () { });
+
+  conn.on('close', function () {
+    delete clients[conn.id];
+  });
 });
 
 
