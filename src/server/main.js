@@ -15,9 +15,12 @@ import { convertFont } from './api/convertFont.js';
 import { runnode } from './api/runNode.js';
 import bodyParser from 'body-parser';
 import { youtubedownload } from './api/ytdl.js';
+import sockjs from 'sockjs';
+
 
 const argv = minimist(process.argv.slice(2))
 const env = process.env.NODE_ENV || 'development';
+let io;
 
 console.log(process.argv)
 console.log(argv)
@@ -42,6 +45,14 @@ app.post('/api/ytdl', youtubedownload);
 
 cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
 
+const echo = sockjs.createServer();
+echo.on('connection', function (conn) {
+  conn.on('data', function (message) {
+    conn.write(message);
+  });
+  conn.on('close', function () { });
+});
+
 
 const options = {
   key: fs.readFileSync("./.ssl/OPENTOOL.ME.key"),
@@ -53,9 +64,23 @@ if (env === 'production') {
   app.use(express.static('dist'))
   app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
   const server = https.createServer(options, app).listen(443);
+  //io = new Socketioserver(server);
   http.createServer(app).listen(80);
+
+  echo.installHandlers(server, { prefix: '/api/echo' });
 }
 else {
   const server = http.createServer(app).listen(port);
   ViteExpress.bind(app, server);
+  //io = new Socketioserver(server);
+  echo.installHandlers(server, { prefix: '/api/echo' });
+
 }
+
+/*
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg);
+  });
+});
+*/
