@@ -2,7 +2,10 @@ import styled from "styled-components";
 
 const typeColor = {
   'submit': 'green',
-  'danger': 'red'
+  'normal': 'green',
+  'danger': 'red',
+  'info': 'blue',
+  'warn': 'brown',
 }
 
 const StyledButton = styled.button`

@@ -19,7 +19,7 @@ import { initDb } from './model/init.js';
 import { Message } from './model/message.js';
 import { message } from './api/message.js';
 import sockjs from 'sockjs';
-import { GameServer } from './gameserver/gameserver.js';
+import { GameServer } from './gameserver/GameServer.js';
 import { BlackjackGame } from './gameserver/BlackjackGame.js';
 
 

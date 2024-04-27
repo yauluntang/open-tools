@@ -150,14 +150,15 @@ export const Chat = () => {
 
   return <div>
 
-    {!name && <>
+    {!name && <div style={{ padding: '100px', margin: 'auto', width: '500px' }}>
       <Input type="string" label="Your Name" value={tempname} onChange={setTempname} />
-      <Button type="button" size="large" onClick={enterName} > Enter</Button>
-    </>}
-    {name && <div style={{ padding: '50px' }}>
+      <Button style={{ marginTop: '10px' }} type="button" size="large" onClick={enterName} > Enter</Button>
+    </div>}
+    {name && <div style={{ padding: '5px' }}>
 
-      {!currentRoom && <><Button type="button" onClick={createGame}> Create Blackjack Game</Button>
-        <div style={{ height: '300px', padding: '25px', background: 'white' }}>
+      {!currentRoom && <>
+        <div>Casino</div>
+        <div style={{ height: '300px', padding: '5px', background: 'white' }}>
           {rooms && rooms.map((room, i) => <div key={i}>
             {room.name} <Button type="button" size="medium" onClick={joinRoom(room.name)}>Join this room</Button> {room.size}/{room.capacity}</div>)}
 
@@ -165,19 +166,19 @@ export const Chat = () => {
 
       {currentRoom && currentRoom.type === 'Blackjack' && <Blackjack gameServer={gameServer} />}
 
-
-
+      {/*
       <div style={{ height: '500px', padding: '25px', background: 'white' }}>
         {message.map((m, i) => <div key={i}>[{moment(m.timeStamp).format('YY-MM-DD hh:mm:ss')}] <b>{m.name}:</b> {m.text}</div>)}
 
-      </div>
-      {channelInfo && <div>{channelInfo?.clientNames.map((v, i) => <div key={i}>{v.name}</div>)}
-      </div>}
+      </div>*/}
+      {/*channelInfo && <div>{channelInfo?.clientNames.map((v, i) => <div key={i}>{v.name}</div>)}
+      </div>*/}
+      {/*
       <form onSubmit={send}>
 
         <Input type="string" label="Text" value={text} onChange={setText} />
         <Button type="submit" size="large" onClick={send}  >Send </Button>
         <Button type="button" size="large" onClick={exit}  >Exit </Button>
-      </form>
+    </form>*/}
     </div>}</div>
 }

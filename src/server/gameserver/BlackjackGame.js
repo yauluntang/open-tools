@@ -1,6 +1,6 @@
 const SuitToName = { 0: 'Diamond', 1: 'Club', 2: 'Heart', 3: 'Spade' };
 
-const SHORT_WAIT = 100;
+const SHORT_WAIT = 500;
 const ONE_SECOND = 1000;
 const LONG_WAIT = 2000;
 const BLACKJACK = 21;
@@ -133,7 +133,12 @@ function btw(compare, min, max) {
 
 export class BlackjackGame {
 
-  constructor() {
+
+  constructor(rules) {
+    this.maxSplit = rules?.maxSplit || 2;
+    this.bet = rules?.bet || 10;
+    this.initMoney = rules?.initMoney || 1000;
+    this.numberOfDecks = rules?.numberOfDecks || 3;
   }
 
   sendToClients = (data, sendRoomFunc) => {
@@ -190,38 +195,42 @@ export class BlackjackGame {
       id: client.id,
       name: client.name,
       hands: [{ hand: new Hand(), stand: false, win: 0 }],
-      originalBet: 100,
-      bet: 100,
+      originalBet: this.bet,
+      bet: this.bet,
       win: 0,
       isAI: false
     }));
 
-    for (let i = 1; i <= 2; i++) {
+    const aiPlayers = 4 - currentRound.players.length;
+
+    for (let i = 1; i <= aiPlayers; i++) {
       currentRound.players.push(
         {
           id: `AI-${i}`,
           name: `AI-${i}`,
           hands: [{ hand: new Hand(), stand: false, win: 0 }],
-          originalBet: 100,
-          bet: 100,
+          originalBet: this.bet,
+          bet: this.bet,
           win: 0,
           isAI: true
         }
       )
     }
 
-    for (let i = 1; i <= 2; i++) {
-      data.publicData.playerStat[currentRound.players[i].id].money -= 100;
+    for (let i = 1; i <= aiPlayers; i++) {
+      data.publicData.playerStat[currentRound.players[i].id].money -= this.bet;
 
     }
 
 
     data.clients.forEach((client) => {
-      data.publicData.playerStat[client.id].money -= 100;
+      data.publicData.playerStat[client.id].money -= this.bet;
     })
 
+
+
     const { bucket, house } = currentRound;
-    bucket.addNumberOfDecks(5);
+    bucket.addNumberOfDecks(this.numberOfDecks);
     bucket.shuffleCards();
 
 
@@ -291,12 +300,12 @@ export class BlackjackGame {
             do {
 
 
-              this.aiHandling(data, sendRoomFunc, house, player);
+              await this.aiHandling(data, sendRoomFunc, house, player);
 
 
 
 
-              await sleep(ONE_SECOND);
+              //await sleep(ONE_SECOND);
 
               currentRound.currentWait--;
             } while (currentRound.actionPending && currentRound.currentWait > 0)
@@ -390,12 +399,12 @@ export class BlackjackGame {
             h.win = player.originalBet * 2.5;
 
           }
-          else if (playerScore > houseMaxScore) {
+          else if (playerScore > houseMaxScore && playerScore <= BLACKJACK) {
             player.win += player.originalBet * 2;
             h.win = player.originalBet * 2;
 
           }
-          else if (playerScore === houseMaxScore) {
+          else if (playerScore === houseMaxScore && playerScore <= BLACKJACK) {
             player.win += player.originalBet;
             h.win = player.originalBet;
 
@@ -429,22 +438,24 @@ export class BlackjackGame {
   aiHandling = async (data, sendRoomFunc, house, player) => {
     let index = 0;
     const dScore = house.getVisibleScore();
-    let action = 'S';
 
     for (let h of player.hands) {
 
+      let action = null;
+
       // Pair Strategy
+      const isSplittable = player.hands.length < this.maxSplit;
       const isPair = (h.hand.cards.length === 2 && h.hand.cards[0].rank === h.hand.cards[1].rank);
       const aceStrategy = h.hand.hasAce() && h.hand.cards.length === 2;
 
       if (isPair) {
         const rank = h.hand.cards[0].rank;
         if (rank == 1 || rank == 8) {
-          action = 'SP';
+          action = isSplittable ? 'SP' : null;
         }
         else if (ins(rank, [2, 3])) {
           if (dScore >= 4 && dScore <= 7) {
-            action = 'SP';
+            action = isSplittable ? 'SP' : null;
           }
           else {
             action = 'H';
@@ -463,7 +474,7 @@ export class BlackjackGame {
         }
         else if (ins(rank, [6, 7])) {
           if (btw(dScore, 2, 6)) {
-            action = 'SP'
+            action = isSplittable ? 'SP' : null;
           }
           else {
             action = 'H'
@@ -474,17 +485,19 @@ export class BlackjackGame {
             action = 'S'
           }
           else {
-            action = 'SP'
+            action = isSplittable ? 'SP' : null;
           }
         }
         else {
           action = 'S'
         }
       }
+
+
       // Ace-X Strategy
-      else if (aceStrategy) {
+      if (aceStrategy && !action) {
         const score = h.hand.getSoftScore()
-        if (btw(score, 3, 7)) {
+        if (btw(score, 2, 7)) {
           if (btw(dScore, 4, 6)) {
             action = 'D'
           }
@@ -507,7 +520,8 @@ export class BlackjackGame {
           action = 'S'
         }
       }
-      else {
+
+      if (!action) {
         const score = h.hand.getMaxScore();
         if (score <= 7) {
           action = 'H'
@@ -541,20 +555,21 @@ export class BlackjackGame {
         }
         else if (score == 12) {
           if (ins(dScore, [4, 5, 6])) {
-            action = 'S'
+            action = 'S';
+          }
+          else {
+            action = 'H';
           }
         }
         else if (ins(dScore, [13, 14, 15, 16])) {
-          if (ins(dScore, [2, 3, 4, 5, 6])) {
-            action = 'S'
-          }
-          else {
+          if (ins(dScore, [1, 7, 8, 9, 10])) {
             action = 'H'
           }
         }
-        else {
-          action = 'S'
-        }
+      }
+
+      if (!action) {
+        action = 'S';
       }
 
 
@@ -565,19 +580,23 @@ export class BlackjackGame {
 
       switch (action) {
         case 'H': {
-          this.hitCard(data, sendRoomFunc, player.id, index);
+          await this.hitCard(data, sendRoomFunc, player.id, index);
+          await shortSleep();
+
           break;
         }
         case 'D': {
-          this.double(data, sendRoomFunc, player.id);
+          await this.double(data, sendRoomFunc, player.id);
+          await shortSleep();
+
           break;
         }
         case 'S': {
-          this.stand(data, sendRoomFunc, player.id, index);
+          await this.stand(data, sendRoomFunc, player.id, index);
           break;
         }
         case 'SP': {
-          this.split(data, sendRoomFunc, player.id, index);
+          await this.split(data, sendRoomFunc, player.id, index);
           break;
         }
       }
@@ -598,7 +617,7 @@ export class BlackjackGame {
     if (currentRound.currentPointer === findPlayer && !findPlayer.hands[realIndex].stand) {
 
       const originalHand = findPlayer.hands[realIndex].hand;
-      if (findPlayer.hands.length <= 3 && originalHand.isSplittable() && data.publicData.playerStat[clientid].money >= findPlayer.bet) {
+      if (findPlayer.hands.length < this.maxSplit && originalHand.isSplittable() && data.publicData.playerStat[clientid].money >= findPlayer.bet) {
 
         currentRound.currentWait = 10;
 
@@ -619,11 +638,11 @@ export class BlackjackGame {
         originalHand.addCard(bucket.popCard())
         newHand.addCard(bucket.popCard());
 
-        if (findPlayer.hands[realIndex].getMaxScore() == BLACKJACK) {
+        if (findPlayer.hands[realIndex].hand.getMaxScore() == BLACKJACK) {
           findPlayer.hands[realIndex].stand = true;
         }
 
-        if (findPlayer.hands[latestIndex].getMaxScore() == BLACKJACK) {
+        if (findPlayer.hands[latestIndex].hand.getMaxScore() == BLACKJACK) {
           findPlayer.hands[latestIndex].stand = true;
         }
 
@@ -669,6 +688,9 @@ export class BlackjackGame {
           }
 
           this.sendToClients(data, sendRoomFunc);
+        }
+        else {
+          await this.hitCard(data, sendRoomFunc, clientid, 0);
         }
       }
     }
@@ -760,13 +782,11 @@ export class BlackjackGame {
         data.publicData.playerStat[client.id] = {};
         data.publicData.playerStat[client.id].money = 10000;
 
-        if (!data.publicData.playerStat['AI-1']) {
-          data.publicData.playerStat['AI-1'] = {};
-          data.publicData.playerStat['AI-1'].money = 10000;
-        }
-        if (!data.publicData.playerStat['AI-2']) {
-          data.publicData.playerStat['AI-2'] = {};
-          data.publicData.playerStat['AI-2'].money = 10000;
+        for (let i = 1; i <= 4; i++) {
+          if (!data.publicData.playerStat['AI-' + i]) {
+            data.publicData.playerStat['AI-' + i] = {};
+            data.publicData.playerStat['AI-' + i].money = 10000;
+          }
         }
 
 
@@ -784,16 +804,16 @@ export class BlackjackGame {
       case 'DATA': {
 
         if (msg.data === 'DOUBLE') {
-          this.double(data, sendRoomFunc, client.id);
+          await this.double(data, sendRoomFunc, client.id);
         }
         if (msg.data === 'HIT') {
-          this.hitCard(data, sendRoomFunc, client.id, msg.index);
+          await this.hitCard(data, sendRoomFunc, client.id, msg.index);
         }
         if (msg.data === 'STAND') {
-          this.stand(data, sendRoomFunc, client.id, msg.index);
+          await this.stand(data, sendRoomFunc, client.id, msg.index);
         }
         if (msg.data === 'SPLIT') {
-          this.split(data, sendRoomFunc, client.id, msg.index);
+          await this.split(data, sendRoomFunc, client.id, msg.index);
         }
         break;
       }

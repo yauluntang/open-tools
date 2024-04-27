@@ -2,33 +2,57 @@ import { useCallback, useEffect, useState } from "react";
 import Button from "../../components/input/Button";
 import { CardImage } from "./CardImage";
 import { Chip } from "./Chip";
-import { calculateMaxScore, calculateSoftScore, isSplittable } from "./calculate";
+import { calculateMaxScore, calculateSoftScore, isBlackJack, isSplittable } from "./calculate";
 
 
 
-const DrawHandSmall = ({ hand }) => {
+const DrawHandSmall = ({ hand, handWin }) => {
 
-  return <div style={{ height: "200px" }}>
-    <div style={{ display: 'flex' }}>
+  return <div style={{ height: "100px" }}>
+    <div style={{ display: 'flex', position: 'relative', width: `${25 * hand.length + 25}px` }}>
       {hand && hand.map((card, index) => <CardImage height={50} width={25} number={card} key={index} />)}
 
-      {calculateMaxScore(hand) > 21 && <div style={{ position: 'absolute', fontSize: '12px', marginTop: '25px', marginLeft: '10px', padding: '1px', background: 'rgba(255,255,255,0.9)', border: '1px solid black' }}>BUSTED</div>}
+      <div style={{ position: 'relative' }}>{hand && <Score softScore={calculateSoftScore(hand)} maxScore={calculateMaxScore(hand)} />}</div>
 
+      {calculateMaxScore(hand) > 21 &&
+        <div style={{ position: 'absolute', fontSize: '12px', bottom: '2px', left: '2px', padding: '1px', background: 'rgba(255,255,255,0.9)', border: '1px solid black' }}>
+          BUSTED
+        </div>}
+
+      {isBlackJack(hand) &&
+        <div style={{ fontWeight: 'bold', position: 'absolute', fontSize: '12px', bottom: '2px', left: '2px', padding: '1px', background: 'rgba(255,0,0,1)', color: 'white', border: '1px solid black' }}>
+          BLACKJACK
+        </div>}
+
+      {Boolean(handWin) &&
+        <div style={{ fontWeight: 'bold', position: 'absolute', fontSize: '12px', top: '2px', marginLeft: '5px', padding: '1px', background: handWin > 0 ? 'rgba(0,128,0,1)' : 'rgba(255,0,0,1)', color: 'white', border: '1px solid black' }}>
+          {handWin > 0 ? '+' + handWin : handWin}
+        </div>}
     </div>
-    {hand && <Score softScore={calculateSoftScore(hand)} maxScore={calculateMaxScore(hand)} />}
 
   </div>
 }
 
-const DrawHand = ({ hand }) => {
-  return <div >
-    <div style={{ position: 'relative', width: `${hand.length * 30 + 100}px`, height: '100px', display: 'flex', alignItems: 'center' }}>
+const DrawHand = ({ hand, handWin }) => {
+  return <div style={{ display: 'flex', width: `${hand.length * 30 + 80}px` }}>
+    <div style={{ position: 'relative', width: `${hand.length * 30 + 50}px`, height: '100px', display: 'flex', alignItems: 'center' }}>
       {hand && hand.map((card, index) =>
         <div style={{ position: 'absolute', left: `${index * 30}px` }} key={index}>
           <CardImage largeForm height={100} number={card} /></div>)}
-      {calculateMaxScore(hand) > 21 && <div style={{ position: 'absolute', fontSize: '30px', marginLeft: '10px', padding: '5px', background: 'rgba(255,255,255,0.9)', border: '1px solid black' }}>BUSTED</div>}
+      {calculateMaxScore(hand) > 21 && <div style={{ position: 'absolute', fontSize: '24px', bottom: '2px', marginLeft: '5px', padding: '5px', background: 'rgba(255,255,255,0.9)', border: '1px solid black' }}>BUSTED</div>}
+
+      {isBlackJack(hand) &&
+        <div style={{ fontWeight: 'bold', position: 'absolute', fontSize: '24px', bottom: '2px', marginLeft: '5px', padding: '1px', background: 'rgba(255,0,0,1)', color: 'white', border: '1px solid black' }}>
+          BLACKJACK
+        </div>}
+
+      {Boolean(handWin) &&
+        <div style={{ fontWeight: 'bold', position: 'absolute', fontSize: '24px', top: '2px', marginLeft: '5px', padding: '1px', background: handWin > 0 ? 'rgba(0,128,0,1)' : 'rgba(255,0,0,1)', color: 'white', border: '1px solid black' }}>
+          {handWin > 0 ? '+' + handWin : handWin}
+        </div>}
+
     </div >
-    {hand && <Score softScore={calculateSoftScore(hand)} maxScore={calculateMaxScore(hand)} />}
+    {hand && <div style={{ position: 'relative' }}><Score softScore={calculateSoftScore(hand)} maxScore={calculateMaxScore(hand)} /></div>}
   </div>
 
 
@@ -36,7 +60,12 @@ const DrawHand = ({ hand }) => {
 
 const Score = ({ softScore, maxScore }) => {
 
-  return <div style={{ display: 'flex' }}>  {(maxScore === softScore) ? <div>{softScore}</div> : <div>{softScore}/{maxScore}</div>}</div>
+  return <>{Boolean(softScore) && Boolean(maxScore) && <div style={{ userSelect: 'none', position: 'absolute', background: 'white', display: 'flex', border: '1px solid black', borderRadius: '4px', padding: '2px', fontSize: '12px', fontWeight: 'bold' }}>
+    {(maxScore === softScore) ? <div>{softScore}</div> : <div>
+      <div style={{ borderBottom: '1px solid black', textAlign: 'center' }}>{maxScore}</div>
+      <div style={{ textAlign: 'center' }}>{softScore}</div>
+    </div>}
+  </div>}</>
 }
 
 export const Blackjack = ({ gameServer }) => {
@@ -98,44 +127,55 @@ export const Blackjack = ({ gameServer }) => {
 
 
 
-    {roomData && <Button type="button" size="large" onClick={leaveGame}  >Leave Game </Button>}
+
 
     {roomData && roomData.clientList && <div>
 
-      <div style={{ border: '1px solid grey' }}><div><Score softScore={roomData.houseSoftScore} maxScore={roomData.houseMaxScore} /> </div><DrawHand hand={roomData.house}></DrawHand> </div>
 
-      <div style={{ border: '1px solid grey' }}>
-        {roomData.clientList.filter((client) => (client.id !== gameServer.clientId || true)).map((client, index) => <div key={index}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 
-          <div style={{ display: 'flex' }}>
-            <div>{client.name} have: {client.money} bet: {client.bet} winnings: {client.win} </div>
-            {client.isCurrentPlayer && <div>   Waiting...  ({client.wait}) </div>} </div>
+        <div >
+          DEALER
+          <DrawHand hand={roomData.house}></DrawHand> </div>
 
-          <div style={{ display: 'flex' }}>{client.hands.map((hand, index) => <div style={{ height: '80px' }} key={index}><DrawHandSmall hand={hand.hand}></DrawHandSmall> </div>)}</div>
+        <div>
 
-        </div>)}
 
-      </div>
+          {roomData.clientList.filter((client) => (client.id !== gameServer.clientId)).map((client, index) => <div style={{ background: `${client.isCurrentPlayer ? 'yellow' : 'white'}`, mragin: '2px', borderRadius: '5px', padding: '5px' }} key={index}>
 
-      <Chip value={10} />
-      <Chip value={20} />
-      <Chip value={100} />
-      <Chip value={200} />
+            <div style={{ display: 'flex' }}>
+              <div style={{ fontSize: '12px' }}>{client.name} <b>${client.money}</b></div>
+            </div>
 
-      {player && <div>
-        YOU: have:{player.money}  bet: {player.bet} winnings: {player.win}
+            <div style={{ display: 'flex' }}>{client.hands.map((hand, index) => <div style={{ height: '50px' }} key={index}><DrawHandSmall hand={hand.hand} handWin={hand.win}></DrawHandSmall> </div>)}</div>
+
+          </div>)}
+
+        </div></div>
+
+      {player && <div style={{ background: `${player.isCurrentPlayer ? 'yellow' : 'white'}`, border: '1px solid #ddd', padding: '5px', borderRadius: '5px' }}>
+        YOU ({player.name}): <b>${player.money}</b>  -${player.bet}  {player.isCurrentPlayer && <span style={{ marginLeft: '20px' }}>Remaining ({player.wait}s) </span>}
         {player.hands.map((hand, index) => <div key={index}>
           <div><DrawHand hand={hand.hand} handWin={hand.win}></DrawHand> </div>
-          {player.isCurrentPlayer && !hand.stand && <>
-            <Button type="button" size="large" onClick={hitCard(index)}  >HIT </Button>
-            <Button type="button" size="large" onClick={stand(index)}  >STAND  </Button>
-            {player.hands.length === 1 && hand.hand.length === 2 && <Button type="button" size="large" onClick={double}  >DOUBLE </Button>}
 
-            {isSplittable(hand.hand) && <Button type="button" size="large" onClick={splitHand(index)}  >SPLIT  </Button>}
-            <div>({player.wait})</div>
+          {<>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div>
+                {player.isCurrentPlayer && !hand.stand && <>
+                  <Button style={{ margin: '0px 5px', width: '100px' }} type="danger" size="large" onClick={hitCard(index)}  >HIT </Button>
+                  <Button style={{ margin: '0px 5px', width: '100px' }} type="primary" size="large" onClick={stand(index)}  >STAND  </Button>
+                  {player.hands.length === 1 && hand.hand.length === 2 && <Button style={{ margin: '0px 5px', width: '100px' }} type="info" size="large" onClick={double}  >DOUBLE </Button>}
+
+                  {isSplittable(hand.hand) && player.hands.length < 2 && <Button style={{ margin: '0px 5px', width: '100px' }} type="warn" size="large" onClick={splitHand(index)}  >SPLIT  </Button>}</>}
+              </div>
+
+            </div>
           </>}
 
         </div>)}
+        <div style={{ textAlign: 'right' }}>
+          <Button type="button" size="large" onClick={leaveGame}  >Leave Game </Button>
+        </div>
       </div>}
     </div>}
   </div>

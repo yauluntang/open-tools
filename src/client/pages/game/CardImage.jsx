@@ -71,7 +71,7 @@ export const CardImage = ({ width = 80, height = 120, number, largeForm }) => {
     display: 'flex',
     userSelect: 'none',
     justifyContent: 'center',
-    padding: '4px',
+    padding: '2px',
     borderRadius: '4px',
     fontWeight: 'bold',
     background: 'white',

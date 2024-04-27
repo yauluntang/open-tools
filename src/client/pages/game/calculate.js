@@ -8,6 +8,8 @@ export const getMaxScore = cards => {
   return (minScore <= 11 && hasAce(cards)) ? minScore + 10 : minScore;
 }
 
+export const isBlackJack = h => h.length === 2 && getMaxScore(getCards(h)) == 21;
+
 export const calculateMaxScore = h => getMaxScore(getCards(h))
 
 export const calculateSoftScore = h => getSoftScore(getCards(h))
