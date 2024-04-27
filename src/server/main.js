@@ -18,8 +18,6 @@ import { youtubedownload } from './api/ytdl.js';
 import { initDb } from './model/init.js';
 import { Message } from './model/message.js';
 import { message } from './api/message.js';
-import { playground } from "@colyseus/playground";
-
 import sockjs from 'sockjs';
 import { GameServer } from './gameserver/gameserver.js';
 import { BlackjackGame } from './gameserver/BlackjackGame.js';
@@ -51,7 +49,7 @@ app.get('/api/clean-up', cleanUpload);
 app.post('/api/runnode', runnode);
 app.post('/api/ytdl', youtubedownload);
 
-app.use("/api/playground", playground);
+
 app.get('/api/message', message);
 
 cron.schedule('*/15 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });

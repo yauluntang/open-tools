@@ -9,16 +9,10 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@colyseus/core": "^0.15.31",
-    "@colyseus/playground": "^0.15.12",
-    "@colyseus/ws-transport": "^0.15.1",
     "@distube/ytdl-core": "^4.13.3",
-    "@material-ui/core": "^4.12.4",
     "@monaco-editor/react": "^4.6.0",
     "axios": "^1.6.8",
     "body-parser": "^1.20.2",
-    "colyseus": "^0.15.15",
-    "colyseus.js": "^0.15.18",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "ejson": "^2.2.3",

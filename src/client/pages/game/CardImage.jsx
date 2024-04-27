@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react"
 import styled from 'styled-components';
-import CardSingle from '../../components/cards/CardSingle';
-
 const SuitToName = { 0: '♦', 1: '♣', 2: '♥', 3: '♠' };
 const SuitToColor = { 0: 'red', 1: 'black', 2: 'red', 3: 'black' }
 const StyledDiv = styled.div`
