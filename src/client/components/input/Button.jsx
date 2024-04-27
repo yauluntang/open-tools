@@ -17,7 +17,9 @@ function Button({ label, size, children, onClick, ...rest }) {
 
   const handleClick = (e) => {
     e.preventDefault();
-    onClick();
+    if (onClick) {
+      onClick();
+    }
   }
 
   return (

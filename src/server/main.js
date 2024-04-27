@@ -15,10 +15,15 @@ import { convertFont } from './api/convertFont.js';
 import { runnode } from './api/runNode.js';
 import bodyParser from 'body-parser';
 import { youtubedownload } from './api/ytdl.js';
-import sockjs from 'sockjs';
 import { initDb } from './model/init.js';
 import { Message } from './model/message.js';
 import { message } from './api/message.js';
+import { playground } from "@colyseus/playground";
+
+import sockjs from 'sockjs';
+import { GameServer } from './gameserver/gameserver.js';
+import { BlackjackGame } from './gameserver/BlackjackGame.js';
+
 
 
 const argv = minimist(process.argv.slice(2))
@@ -46,16 +51,18 @@ app.get('/api/clean-up', cleanUpload);
 app.post('/api/runnode', runnode);
 app.post('/api/ytdl', youtubedownload);
 
-
+app.use("/api/playground", playground);
 app.get('/api/message', message);
 
-cron.schedule('*/5 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
+cron.schedule('*/15 * * * *', cleanUpload, { scheduled: true, timezone: 'America/Toronto' });
 
 const echo = sockjs.createServer();
 
-const clients = {};
-
 initDb();
+
+
+
+const clients = {};
 
 const broadcast = (message) => {
   // iterate through each client in clients object
@@ -66,16 +73,12 @@ const broadcast = (message) => {
 }
 
 echo.on('connection', (conn) => {
-
   clients[conn.id] = conn;
-
   conn.on('data', async (message) => {
     const messageObject = JSON.parse(message)
     console.log(message);
     messageObject.timeStamp = new Date().getTime();
-
     await Message.create(messageObject);
-
     broadcast(message);
   });
 
@@ -90,28 +93,63 @@ const options = {
   cert: fs.readFileSync("./.ssl/OPENTOOL.ME.crt"),
 };
 
+let server;
+
 
 if (env === 'production') {
   app.use(express.static('dist'))
   app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
-  const server = https.createServer(options, app).listen(443);
+  server = https.createServer(options, app).listen(443);
   //io = new Socketioserver(server);
-  http.createServer(app).listen(80);
+  //http.createServer(app).listen(80);
 
-  echo.installHandlers(server, { prefix: '/api/echo' });
+  echo.installHandlers(server, { prefix: '/api/e' });
 }
 else {
-  const server = http.createServer(app).listen(port);
+  server = http.createServer(app).listen(port);
   ViteExpress.bind(app, server);
   //io = new Socketioserver(server);
-  echo.installHandlers(server, { prefix: '/api/echo' });
+
+  echo.installHandlers(server, { prefix: '/api/e' });
+
 
 }
-
 /*
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+const primus = new Primus(server);
+primus.on('connection', (spark) => {
+
+  spark.send('news', { hello: 'world' });
+
+  // listen to hi events
+  spark.on('hi', (msg) => {
+    console.log(msg); //-> hello world
+
+    // send back the hello to client
+    spark.send('hello', 'hello from the server');
   });
+});*/
+
+
+
+const gameServer = new GameServer(server, '/api/echo');
+
+gameServer.addChannel('lobby');
+const blackjackGame = new BlackjackGame();
+gameServer.broadcast(message);
+
+gameServer.setupRoomType('Blackjack', { capacity: 10 })
+
+for (let i = 0; i < 10; i++) {
+  const blackjackGame = new BlackjackGame();
+
+  gameServer.setRoomReceiveCallback(`Blackjack-${i}`, 'Blackjack', blackjackGame)
+}
+
+
+gameServer.setDataReceiveCallback('chat', async (message) => {
+  //console.log(message);
+  //await Message.create(message);
+
 });
-*/
+
+

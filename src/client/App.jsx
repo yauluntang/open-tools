@@ -13,9 +13,11 @@ import FontConverter from './pages/FontConverter'
 import { NodeJsMockTop } from './pages/NodeJsMockTop'
 import { YoutubeDownload } from './pages/YoutubeDownload'
 import { Chat } from './pages/game/Chat'
+import { Pocker } from './pages/game/Pocker'
 
 export const AppRoutes = [
   { path: "/game/chat", element: < Chat />, name: 'Chat' },
+  { path: "/game/pocker", element: < Pocker />, name: 'Pocker' },
   { path: "/gcf", element: < GCF />, name: 'GCF' },
   { path: "/image-converter", element: < ImageConverter />, name: 'Image Convertor' },
   { path: "/font-converter", element: < FontConverter />, name: 'Font Converter' },
