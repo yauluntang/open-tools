@@ -21,8 +21,9 @@ export const Chat = () => {
 
   const [text, setText] = useState('');
   const [name, setName] = useState('');
-  const [currentRoom, setCurrentRoom] = useState(null);
 
+  const [roomName, setRoomName] = useState(null);
+  const [roomType, setRoomType] = useState(null);
 
 
 
@@ -60,20 +61,24 @@ export const Chat = () => {
 
   gameServer.setDataReceiveCallback({ scope: 'GLOBAL', uniqueKey: 'chat' }, useCallback(async (msg) => {
     console.log('setDataReceiveCallback', 'ROOMLIST', msg)
-    setRooms(msg.message.roomList)
-  }), [setRooms, rooms])
 
-
-  gameServer.setDataReceiveCallback({ scope: 'ROOM', uniqueKey: 'chat' }, useCallback(async (msg) => {
-    console.log('setRoomcallback', msg)
-    if (msg.type === 'INFO') {
-      setCurrentRoom(msg.message);
-    }
-    else if (msg.type === 'LEAVE') {
-      setCurrentRoom(null);
+    if (msg.type === 'ROOMLIST') {
+      setRooms(msg.message.roomList)
     }
 
-  }), [setCurrentRoom, currentRoom])
+    if (msg.type === 'ROOMJOIN') {
+      setRoomName(msg.roomName);
+      setRoomType(msg.roomType);
+    }
+
+    if (msg.type === 'ROOMLEAVE') {
+      setRoomName(null);
+      setRoomType(null);
+    }
+
+
+
+  }), [setRooms, rooms, roomName, setRoomName, roomType, setRoomType])
 
 
   const send = useCallback(() => {
@@ -129,7 +134,7 @@ export const Chat = () => {
 
 
   const joinRoom = (roomName) => () => {
-    gameServer.send('ROOM', 'JOIN', { roomName })
+    gameServer.send('GLOBAL', 'ROOMJOIN', { roomName })
   }
 
 
@@ -156,7 +161,7 @@ export const Chat = () => {
     </div>}
     {name && <div style={{ padding: '5px' }}>
 
-      {!currentRoom && <>
+      {!roomName && <>
         <div>Casino</div>
         <div style={{ height: '300px', padding: '5px', background: 'white' }}>
           {rooms && rooms.map((room, i) => <div key={i}>
@@ -164,7 +169,7 @@ export const Chat = () => {
 
         </div></>}
 
-      {currentRoom && currentRoom.type === 'Blackjack' && <Blackjack gameServer={gameServer} />}
+      {roomName && roomType === 'Blackjack' && <Blackjack gameServer={gameServer} roomName={roomName} />}
 
       {/*
       <div style={{ height: '500px', padding: '25px', background: 'white' }}>

@@ -25,6 +25,73 @@ const handleGlobalData = async (gameServer, client, msg) => {
       break;
     }
 
+    case 'ROOMJOIN': {
+      const roomName = msg.roomName;
+
+      // Check existence
+      if (!gameServer.rooms.has(roomName)) {
+        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room does not exist', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
+        return;
+      }
+      const room = gameServer.rooms.get(roomName);
+      const roomTypeOption = gameServer.roomTypeOptions.get(room.type);
+
+      if (!roomTypeOption) {
+        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room Type Option is invalid', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
+        return;
+      }
+
+      // Check capacity
+      if (roomTypeOption.capacity && room.clients.size >= roomTypeOption.capacity) {
+        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room is full', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
+        return;
+      }
+
+      room.clients.set(client.id, client);
+
+
+      client.room = roomName;
+      gameServer.sendRoomList();
+
+      gameServer.sendRoom({ scope: 'ROOM', type: 'JOIN', message: { name: client.name, id: client.id } }, roomName, { ignoreSelf: true });
+
+      gameServer.echo({ scope: 'GLOBAL', type: 'ROOMJOIN', roomName, roomType: room.type, timeStamp: msg.timeStamp, id: client.id }, client);
+      break;
+    }
+
+
+    case 'ROOMLEAVE': {
+      if (client.room) {
+        const room = gameServer.rooms.get(client.room);
+        const info = gameServer.getRoomInfo(client.room)
+        room.clients.delete(client.id);
+        gameServer.sendRoomList();
+        gameServer.echo({ scope: 'GLOBAL', type: 'ROOMLEAVE', roomType: info.type }, client);
+        client.room = null;
+
+
+
+
+
+        if (info) {
+          //const customRoomCallback = gameServer.roomReceiveCallback[client.room];
+          const customInstance = gameServer.roomInstance[room.name];
+          const sendRoomFunc = (message) => {
+            if (room.name) {
+              gameServer.sendRoom(message, originalRoom)
+            }
+          };
+          await customInstance.callback({ gameServer, client, msg: { scope: 'ROOM', type: 'LEAVE' }, sendRoomFunc, info, data: room.data, customInstance });
+        }
+
+
+      }
+      else {
+        gameServer.echo({ scope: 'GLOBAL', type: 'ERROR', error: 'Not in a room', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
+      }
+      break;
+    }
+
     default: {
       break;
     }
@@ -135,60 +202,10 @@ const handleRoomData = async (gameServer, client, msg) => {
     }*/
 
     case 'JOIN': {
-      const roomName = msg.roomName;
-
-      // Check existence
-      if (!gameServer.rooms.has(roomName)) {
-        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room does not exist', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
-        return;
-      }
-      const room = gameServer.rooms.get(roomName);
-      const roomTypeOption = gameServer.roomTypeOptions.get(room.type);
-
-      if (!roomTypeOption) {
-        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room Type Option is invalid', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
-        return;
-      }
-
-      // Check capacity
-      if (roomTypeOption.capacity && room.clients.size >= roomTypeOption.capacity) {
-        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Room is full', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
-        return;
-      }
-
-      room.clients.set(client.id, client);
-      client.room = roomName;
-      originalRoom = roomName;
-
-      gameServer.sendRoomList();
-
       gameServer.sendRoomInfo(client.room, client);
       break;
     }
 
-    case 'LEAVE': {
-      if (client.room) {
-        const room = gameServer.rooms.get(client.room);
-        const info = gameServer.getRoomInfo(client.room)
-
-        room.clients.delete(client.id);
-
-        /*
-        if (room.clients.size === 0) {
-          gameServer.rooms.delete(client.room);
-        }*/
-
-        gameServer.sendRoomList();
-
-        gameServer.echo({ scope: 'ROOM', type: 'LEAVE', roomType: info.type }, client);
-
-        client.room = null;
-      }
-      else {
-        gameServer.echo({ scope: 'ROOM', type: 'ERROR', error: 'Not in a room', timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client);
-      }
-      break;
-    }
 
     case 'MESSAGE': {
       gameServer.sendRoom({ scope: 'ROOM', type: 'MESSAGE', message: msg.message, timeStamp: msg.timeStamp, id: client.id, sender: client.name }, client.room);

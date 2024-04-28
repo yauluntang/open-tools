@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import logo from "../../assets/logo-min.png"
 import styled from "styled-components"
 import { AppRoutes } from "../../App"
+
 const Ul = styled.ul`
   display: flex
 `
@@ -18,9 +19,10 @@ const StyledLink = styled(Link)`
 `
 
 function Header() {
+  let location = useLocation();
 
   return (
-    <>
+    <>{!location.pathname.startsWith('/game') &&
       <div className={`bg-blue-950`}>
         <div className={`flex content-center items-center`} style={{ height: '50px', display: 'flex' }}>
           <img style={{ height: '50px' }} src={logo} />
@@ -31,7 +33,7 @@ function Header() {
             {AppRoutes.map((route, index) => <Li key={index}><StyledLink to={route.path}>{route.name}</StyledLink></Li>)}
           </ul>
         </div>
-      </div>
+      </div>}
     </>
   )
 }

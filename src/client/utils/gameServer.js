@@ -56,6 +56,10 @@ export class GameServer {
 
   }
 
+  joinRoom(roomName) {
+    this.send('ROOM', 'JOIN', { roomName });
+  }
+
   sendChannelMessage(channelName, message) {
     this.send('CHANNEL', 'MESSAGE', { channelName, message })
   }

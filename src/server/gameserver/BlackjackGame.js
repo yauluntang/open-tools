@@ -1,6 +1,6 @@
 const SuitToName = { 0: 'Diamond', 1: 'Club', 2: 'Heart', 3: 'Spade' };
 
-const SHORT_WAIT = 500;
+const SHORT_WAIT = 400;
 const ONE_SECOND = 1000;
 const LONG_WAIT = 2000;
 const BLACKJACK = 21;
@@ -201,6 +201,9 @@ export class BlackjackGame {
       isAI: false
     }));
 
+
+    console.log('PLAYERS: ', currentRound.players);
+
     const aiPlayers = 4 - currentRound.players.length;
 
     for (let i = 1; i <= aiPlayers; i++) {
@@ -216,6 +219,8 @@ export class BlackjackGame {
         }
       )
     }
+
+
 
     for (let i = 1; i <= aiPlayers; i++) {
       data.publicData.playerStat[currentRound.players[i].id].money -= this.bet;
@@ -234,22 +239,33 @@ export class BlackjackGame {
     bucket.shuffleCards();
 
 
-    // House get 1 hidden card
-    house.addCard(bucket.popCard());
 
-    this.sendToClients(data, sendRoomFunc);
 
 
 
     // All players get 1 card
     const { players } = currentRound;
     for (let player of players) {
-
       let index = 0;
       for (let h of player.hands) {
         h.hand.addCard(bucket.popCard())
-        h.hand.addCard(bucket.popCard())
+        if (h.hand.getMaxScore() === BLACKJACK) {
+          player.hands[index].stand = true;
+        }
+        index++;
+      }
+      this.sendToClients(data, sendRoomFunc);
+      await shortSleep();
+    }
+    // House get 1 hidden card
+    house.addCard(bucket.popCard());
+    this.sendToClients(data, sendRoomFunc);
 
+    // All players get another card
+    for (let player of players) {
+      let index = 0;
+      for (let h of player.hands) {
+        h.hand.addCard(bucket.popCard())
         if (h.hand.getMaxScore() === BLACKJACK) {
           player.hands[index].stand = true;
         }
@@ -259,14 +275,14 @@ export class BlackjackGame {
       await shortSleep();
     }
 
+
+
     await shortSleep();
-    // House get 1 card
     house.addCard(bucket.popCard());
     house.cards[1].setHidden(true);
     this.sendToClients(data, sendRoomFunc);
 
     await shortSleep();
-    const houseScore = house.getMaxScore();
     const isHouseBlackJack = house.isBlackJack();
 
     if (isHouseBlackJack) {
@@ -290,6 +306,7 @@ export class BlackjackGame {
           if (!player.isAI) {
             do {
 
+              console.log('PLAYER:' + player.name + ' TURN, wait:' + currentRound.currentWait + ' actionPending: ' + currentRound.actionPending);
               this.sendToClients(data, sendRoomFunc);
               await sleep(ONE_SECOND);
 
@@ -299,7 +316,7 @@ export class BlackjackGame {
           else {
             do {
 
-
+              console.log('AI:' + player.name + ' TURN');
               await this.aiHandling(data, sendRoomFunc, house, player);
 
 
@@ -740,9 +757,11 @@ export class BlackjackGame {
       currentRound.currentWait = 10;
 
 
+      console.log(findPlayer.hands)
       if (findPlayer.hands.every((hand) => hand.stand === true)) {
         currentRound.actionPending = false;
       }
+
       this.sendToClients(data, sendRoomFunc);
     }
   }
@@ -775,17 +794,20 @@ export class BlackjackGame {
       }
       case 'JOIN': {
 
-        data.clients.push(client);
-        if (!data.publicData.playerStat) {
-          data.publicData.playerStat = {};
-        }
-        data.publicData.playerStat[client.id] = {};
-        data.publicData.playerStat[client.id].money = 10000;
+        const exist = data.clients.find((c) => c.id === client.id);
+        if (!exist) {
+          data.clients.push(client);
+          if (!data.publicData.playerStat) {
+            data.publicData.playerStat = {};
+          }
+          data.publicData.playerStat[client.id] = {};
+          data.publicData.playerStat[client.id].money = 10000;
 
-        for (let i = 1; i <= 4; i++) {
-          if (!data.publicData.playerStat['AI-' + i]) {
-            data.publicData.playerStat['AI-' + i] = {};
-            data.publicData.playerStat['AI-' + i].money = 10000;
+          for (let i = 1; i <= 4; i++) {
+            if (!data.publicData.playerStat['AI-' + i]) {
+              data.publicData.playerStat['AI-' + i] = {};
+              data.publicData.playerStat['AI-' + i].money = 10000;
+            }
           }
         }
 

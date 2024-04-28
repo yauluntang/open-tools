@@ -60,15 +60,15 @@ const DrawHand = ({ hand, handWin }) => {
 
 const Score = ({ softScore, maxScore }) => {
 
-  return <>{Boolean(softScore) && Boolean(maxScore) && <div style={{ userSelect: 'none', position: 'absolute', background: 'white', display: 'flex', border: '1px solid black', borderRadius: '4px', padding: '2px', fontSize: '12px', fontWeight: 'bold' }}>
+  return <>{Boolean(softScore) && Boolean(maxScore) && <div style={{ userSelect: 'none', position: 'absolute', background: 'blue', color: 'white', display: 'flex', border: '1px solid black', borderRadius: '4px', padding: '2px', fontSize: '12px', fontWeight: 'bold' }}>
     {(maxScore === softScore) ? <div>{softScore}</div> : <div>
-      <div style={{ borderBottom: '1px solid black', textAlign: 'center' }}>{maxScore}</div>
+      <div style={{ borderBottom: '1px solid white', textAlign: 'center' }}>{maxScore}</div>
       <div style={{ textAlign: 'center' }}>{softScore}</div>
     </div>}
   </div>}</>
 }
 
-export const Blackjack = ({ gameServer }) => {
+export const Blackjack = ({ gameServer, roomName }) => {
 
   const [roomData, setRoomData] = useState();
   const [player, setPlayer] = useState();
@@ -96,29 +96,36 @@ export const Blackjack = ({ gameServer }) => {
 
   }
 
-  gameServer.setDataReceiveCallback({ scope: 'ROOM', uniqueKey: 'blackjack' }, useCallback(async (msg) => {
-    console.log('setRoomcallback', msg)
+  gameServer.setDataReceiveCallback({ scope: 'ROOM', roomName, uniqueKey: 'blackjack' }, useCallback(async (msg) => {
+
     if (msg.type === 'INFO') {
       setCurrentRoom(msg.message);
     }
     if (msg.type === 'DATA') {
       setRoomData(msg.message);
 
-      console.log('gameServer.clientId', gameServer.clientId)
       const { clientList } = msg.message;
       const player = clientList.find((client) => client.id === gameServer.clientId);
       setPlayer(player);
-
     }
+
+
 
 
 
   }), [setCurrentRoom, setRoomData, roomData])
 
+  useEffect(() => {
+    gameServer.joinRoom(roomName);
+  }, [])
+
 
 
   const leaveGame = () => {
-    gameServer.send('ROOM', 'LEAVE');
+
+    gameServer.setDataReceiveCallback({ scope: 'ROOM', roomName, uniqueKey: 'blackjack' }, null);
+
+    gameServer.send('GLOBAL', 'ROOMLEAVE');
   }
 
   return <div>
@@ -135,7 +142,7 @@ export const Blackjack = ({ gameServer }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 
         <div >
-          DEALER
+          DEALER ({roomName})
           <DrawHand hand={roomData.house}></DrawHand> </div>
 
         <div>
@@ -162,17 +169,18 @@ export const Blackjack = ({ gameServer }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 {player.isCurrentPlayer && !hand.stand && <>
-                  <Button style={{ margin: '0px 5px', width: '100px' }} type="danger" size="large" onClick={hitCard(index)}  >HIT </Button>
-                  <Button style={{ margin: '0px 5px', width: '100px' }} type="primary" size="large" onClick={stand(index)}  >STAND  </Button>
-                  {player.hands.length === 1 && hand.hand.length === 2 && <Button style={{ margin: '0px 5px', width: '100px' }} type="info" size="large" onClick={double}  >DOUBLE </Button>}
+                  <Button style={{ margin: '0px 5px', width: '60px' }} type="danger" size="medium" onClick={hitCard(index)}  >HIT </Button>
+                  <Button style={{ margin: '0px 5px', width: '60px' }} type="primary" size="medium" onClick={stand(index)}  >STAND  </Button>
+                  {player.hands.length === 1 && hand.hand.length === 2 && <Button style={{ margin: '0px 5px', width: '60px' }} type="info" size="medium" onClick={double}  >DOUBLE </Button>}
 
-                  {isSplittable(hand.hand) && player.hands.length < 2 && <Button style={{ margin: '0px 5px', width: '100px' }} type="warn" size="large" onClick={splitHand(index)}  >SPLIT  </Button>}</>}
+                  {isSplittable(hand.hand) && player.hands.length < 2 && <Button style={{ margin: '0px 5px', width: '60px' }} type="warn" size="medium" onClick={splitHand(index)}  >SPLIT  </Button>}</>}
               </div>
 
             </div>
           </>}
 
         </div>)}
+        <hr style={{ margin: '10px' }} />
         <div style={{ textAlign: 'right' }}>
           <Button type="button" size="large" onClick={leaveGame}  >Leave Game </Button>
         </div>
