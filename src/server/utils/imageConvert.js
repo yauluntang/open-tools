@@ -71,33 +71,37 @@ export async function toMp4({ allBuffers, fullPath, fileName, crops, watermarkFi
     for (let buffer of allBuffers) {
       let suffix = `_${i}`;
       let extension = '.jpg';
-      let fileName = fullPath + name + suffix + extension;
+      let videofileName = fullPath + name + suffix + extension;
 
-      //const newBuffer = await cropImage(buffer, crops);
+      let newBuffer = await cropImage(buffer, crops);
 
       let image = null;
+
+      /*
       image = await sharp(buffer).resize({
         width: 1280,
         height: 720,
         fit: 'contain',
       }).jpeg({ quality: 80 }).toFile(fileName)
-      /*
+      */
+
       if (watermarkFile) {
-        image = await sharp(newBuffer).resize({
+        newBuffer = await sharp(newBuffer).resize({
           width: 1280,
           height: 720,
           fit: 'contain',
-        }).composite([{ input: watermarkFile, gravity: 'southeast' }]).jpeg({ quality: 80 }).toFile(fileName);
+        }).png().toBuffer();
+        image = await sharp(newBuffer).composite([{ input: watermarkFile.buffer, gravity: 'southeast' }]).jpeg({ quality: 80 }).toFile(videofileName);
       }
       else {
         image = await sharp(newBuffer).resize({
           width: 1280,
           height: 720,
           fit: 'contain',
-        }).jpeg({ quality: 80 }).toFile(fileName);
-      }*/
+        }).jpeg({ quality: 80 }).toFile(videofileName);
+      }
 
-      fileNames.push(fileName)
+      fileNames.push(videofileName)
       i++;
     }
 
@@ -113,7 +117,7 @@ export async function toMp4({ allBuffers, fullPath, fileName, crops, watermarkFi
 }
 
 
-async function fromFile({ file, watermarkFile, crops }) {
+async function fromFile({ file, watermarkFile, fileType, crops }) {
   let { buffer, mimetype } = file;
   buffer = await cropImage(buffer, crops);
 
@@ -127,16 +131,23 @@ async function fromFile({ file, watermarkFile, crops }) {
     case 'image/webp':
     case 'image/svg+xml':
       let newBuffer;
-      if (watermarkFile) {
+
+      /*
+      if (watermarkFile && fileType === 'video/mp4') {
         newBuffer = await sharp(buffer).resize({
           width: 1280,
           height: 720,
           fit: 'contain',
         }).composite([{ input: watermarkFile.buffer, gravity: 'southeast' }]).png().toBuffer();
       }
-      else {
-        newBuffer = await sharp(buffer).png().toBuffer();
+      else if (watermarkFile ) {
+        newBuffer = await sharp(buffer).composite([{ input: watermarkFile.buffer, gravity: 'southeast' }]).png().toBuffer();
       }
+
+      else {
+        
+      }*/
+      newBuffer = await sharp(buffer).png().toBuffer();
       newBuffers.push(newBuffer);
       break;
     case 'image/tiff':
@@ -226,13 +237,18 @@ async function toPdf(buffers, filepath, fileName) {
 }
 
 
-async function toFile(buffer, fullPath, originalFile, suffix, fileType, crops) {
+async function toFile({buffer, fullPath, originalFile, suffix, fileType, watermarkFile, crops}) {
   console.log('toFile:', fullPath, originalFile, fileType);
   const name = path.parse(originalFile).name;
   let extension = null;
 
-  sharpBuffer = buffer;
-  //const sharpBuffer = await cropImage(buffer, crops);
+  //let sharpBuffer = buffer;
+  let sharpBuffer = await cropImage(buffer, crops);
+
+  if ( watermarkFile ) {
+    console.log( 'WaterMarked')
+    sharpBuffer = await sharp(sharpBuffer).composite([{ input: watermarkFile.buffer, gravity: 'southeast' }]).png().toBuffer();
+  }
 
   switch (fileType) {
     case 'image/png':

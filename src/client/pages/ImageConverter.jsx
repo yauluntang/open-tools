@@ -85,8 +85,8 @@ function ImageConverter({ croptovideo }) {
       formData.append("files", file.file);
     }
     if (watermark) {
-      formData.set("watermark", true);
       formData.append("files", watermark);
+      formData.set("watermark", true);
     }
 
     formData.set("fileType", fileType)
