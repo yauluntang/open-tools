@@ -24,10 +24,12 @@ export const Chat = () => {
 
   const [roomName, setRoomName] = useState(null);
   const [roomType, setRoomType] = useState(null);
-
+  const [error, setError] = useState(null);
 
 
   const [rooms, setRooms] = useState(null);
+
+  const [status, setStatus] = useState(null);
 
 
   const [tempname, setTempname] = useState('');
@@ -39,6 +41,10 @@ export const Chat = () => {
     //gameServer.getChannel('lobby')
   });
   //socket.send('hi', 'hello world')
+
+  gameServer.setErrorCallback((e) => {
+    setError(e.message);
+  })
 
   gameServer.setDataReceiveCallback({ scope: 'CHANNEL', channelName: 'lobby', uniqueKey: 'chat' }, useCallback(async (msg) => {
 
@@ -137,7 +143,13 @@ export const Chat = () => {
     gameServer.send('GLOBAL', 'ROOMJOIN', { roomName })
   }
 
+  gameServer.init(() => {
+    setStatus('connected')
+  })
 
+  gameServer.setOnCloseCallback(() => {
+    setStatus('closed')
+  })
 
   useEffect(() => {
     /*
@@ -161,6 +173,7 @@ export const Chat = () => {
     </div>}
     {name && <div style={{ padding: '5px' }}>
 
+      <div>Status: {status} {error}</div>
       {!roomName && <>
         <div>Casino</div>
         <div style={{ height: '300px', padding: '5px', background: 'white' }}>

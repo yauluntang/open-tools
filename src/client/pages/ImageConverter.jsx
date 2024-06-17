@@ -52,6 +52,7 @@ function ImageConverter({ croptovideo }) {
   const [rightCrop, setRightCrop] = useState(0);
   const [topCrop, setTopCrop] = useState(0);
   const [bottomCrop, setBottomCrop] = useState(0);
+  const [watermark, setWatermark] = useState(null);
 
 
   useEffect(() => {
@@ -83,6 +84,11 @@ function ImageConverter({ croptovideo }) {
     for (const file of files) {
       formData.append("files", file.file);
     }
+    if (watermark) {
+      formData.set("watermark", true);
+      formData.append("files", watermark);
+    }
+
     formData.set("fileType", fileType)
     formData.set("leftCrop", leftCrop)
     formData.set("rightCrop", rightCrop)
@@ -121,11 +127,19 @@ function ImageConverter({ croptovideo }) {
     window.open('/api/download?file=' + encodeURI(file.path + file.name))
   }
 
+  const handleWaterMark = (e) => {
+    console.log(e)
+    setWatermark(e.target.files[0])
+  }
+
   return <div id="imageConverter">
 
     <div className='flex content-center justify-center items-center'><img style={{ width: '150px' }} src={imageConverterImage}></img> <h1>Image Converter</h1></div>
 
     <FileDragDrop allowableFileTypes={fileTypeMap} onChange={setFiles} />
+
+    <label>Water Mark</label>
+    <input type="file" onChange={handleWaterMark} />
 
 
     <div className={`${!isLoading && 'hidden'}`}>Loading...</div>

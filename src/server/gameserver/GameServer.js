@@ -353,7 +353,7 @@ export class GameServer {
         }
 
         if (client.room) {
-          handleIncomingData(this, client, { scope: 'ROOM', type: 'LEAVE' });
+          handleIncomingData(this, client, { scope: 'GLOBAL', type: 'ROOMLEAVE' });
         }
         this.clients.delete(client.id);
       }

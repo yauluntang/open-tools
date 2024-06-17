@@ -3,6 +3,7 @@ import fs from 'fs';
 import mime from 'mime';
 import { fromFile, toFile, toPdf, mergePdfs, toMp4 } from '../utils/imageConvert.js';
 import { __dirname, uploadFolder } from '../utils/paths.js';
+import sharp from 'sharp';
 
 const handleAllPdf = async (req, res) => {
   console.log('Handle All PDF')
@@ -32,7 +33,7 @@ const handleImageConversion = async (req, res) => {
   console.log('Handle Image Conversion')
   const timeStamp = new Date().getTime();
   const fullPath = __dirname + uploadFolder + timeStamp + "/";
-  const { fileType, leftCrop, rightCrop, topCrop, bottomCrop } = req.body;
+  const { fileType, leftCrop, rightCrop, topCrop, bottomCrop, watermark } = req.body;
 
   console.log("Body:", req.body)
   const crops = {
@@ -48,9 +49,14 @@ const handleImageConversion = async (req, res) => {
     fs.mkdirSync(fullPath, { recursive: true });
   }
   const outputFileList = [];
-  const wholeBuffers = [];
+  const allBuffers = [];
 
   let firstFileName = null;
+
+  let watermarkFile = null;
+  if (watermark) {
+    watermarkFile = req.files.pop();
+  }
 
   for (const file of req.files) {
     const originalFile = file.originalname;
@@ -58,15 +64,29 @@ const handleImageConversion = async (req, res) => {
       firstFileName = originalFile;
     }
 
-    const buffers = await fromFile(file.buffer, file.mimetype)
+    //let { buffer, mimetype } = file;
+    let buffers = await fromFile({ file, watermarkFile, crops })
 
-    wholeBuffers.push(...buffers);
+    allBuffers.push(...buffers);
 
     console.log("number of buffers:", buffers.length)
     if (!buffers) {
       console.error('Invalid Data')
       res.end(400);
     }
+
+    /*
+    if (watermarkFile) {
+      let watermarkBuffers = [];
+      for (const buffer of buffers) {
+        let modified = await sharp(buffer).composite([{ input: watermarkBuffer, gravity: 'southeast' }]).png().toBuffer();
+        watermarkBuffers.push(modified)
+      }
+
+      buffers = watermarkBuffers
+    }*/
+
+
 
     const fileMainType = fileType.split('/')[0]
 
@@ -93,14 +113,14 @@ const handleImageConversion = async (req, res) => {
     }
   }
   if (fileType === 'application/pdf') {
-    const newFileName = await toPdf(wholeBuffers, fullPath, firstFileName)
+    const newFileName = await toPdf(allBuffers, fullPath, firstFileName)
     const stats = fs.statSync(fullPath + newFileName)
     const size = stats.size;
     const type = mime.getType(fullPath + newFileName)
     outputFileList.push({ path: timeStamp + "/", name: newFileName, size, type })
   }
   else if (fileType === 'video/mp4') {
-    const newFileName = await toMp4(wholeBuffers, fullPath, firstFileName, crops)
+    const newFileName = await toMp4({ allBuffers, fullPath, firstFileName, crops, watermarkFile })
     const stats = fs.statSync(fullPath + newFileName)
     const size = stats.size;
     const type = mime.getType(fullPath + newFileName)

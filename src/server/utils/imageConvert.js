@@ -49,7 +49,7 @@ async function cropImage(sharpBuffer, crops) {
   return sharp(sharpBuffer).extract(dimension).toBuffer();
 }
 
-export async function toMp4(buffers, filepath, fileName, crops) {
+export async function toMp4({ allBuffers, fullPath, fileName, crops, watermarkFile }) {
 
   return new Promise(async (res, rej) => {
 
@@ -58,24 +58,50 @@ export async function toMp4(buffers, filepath, fileName, crops) {
     let i = 0;
     const name = 'tempjpg';
     let fileNames = [];
-    for (let buffer of buffers) {
+
+    let watermarkimage = null;
+
+    /*
+    if (watermarkFile) {
+      watermarkimage = await sharp(watermarkFile.buffer);
+    }*/
+
+
+
+    for (let buffer of allBuffers) {
       let suffix = `_${i}`;
       let extension = '.jpg';
-      let fileName = filepath + name + suffix + extension;
+      let fileName = fullPath + name + suffix + extension;
 
-      const newBuffer = await cropImage(buffer, crops);
-      await sharp(newBuffer).resize({
+      //const newBuffer = await cropImage(buffer, crops);
+
+      let image = null;
+      image = await sharp(buffer).resize({
         width: 1280,
         height: 720,
         fit: 'contain',
-      }).jpeg({ quality: 80 }).toFile(fileName);
+      }).jpeg({ quality: 80 }).toFile(fileName)
+      /*
+      if (watermarkFile) {
+        image = await sharp(newBuffer).resize({
+          width: 1280,
+          height: 720,
+          fit: 'contain',
+        }).composite([{ input: watermarkFile, gravity: 'southeast' }]).jpeg({ quality: 80 }).toFile(fileName);
+      }
+      else {
+        image = await sharp(newBuffer).resize({
+          width: 1280,
+          height: 720,
+          fit: 'contain',
+        }).jpeg({ quality: 80 }).toFile(fileName);
+      }*/
 
       fileNames.push(fileName)
       i++;
     }
 
-    const prompt = 'ffmpeg -framerate 0.5 -i ' + filepath + name + '_%d.jpg -c:v libx264 -r 30 ' + filepath + 'video.mp4';
-
+    const prompt = 'ffmpeg -framerate 0.5 -i ' + fullPath + name + '_%d.jpg -c:v libx264 -r 30 ' + fullPath + 'video.mp4';
     console.log(prompt)
 
     execSync(prompt);
@@ -87,17 +113,30 @@ export async function toMp4(buffers, filepath, fileName, crops) {
 }
 
 
-async function fromFile(buffer, type) {
-  console.log('fromFile:', type);
+async function fromFile({ file, watermarkFile, crops }) {
+  let { buffer, mimetype } = file;
+  buffer = await cropImage(buffer, crops);
+
+  console.log('fromFile:', mimetype);
   let newBuffers = [];
-  switch (type) {
+  switch (mimetype) {
     case 'image/png':
     case 'image/gif':
     case 'image/jpeg':
     case 'image/avif':
     case 'image/webp':
     case 'image/svg+xml':
-      const newBuffer = await sharp(buffer).png().toBuffer();
+      let newBuffer;
+      if (watermarkFile) {
+        newBuffer = await sharp(buffer).resize({
+          width: 1280,
+          height: 720,
+          fit: 'contain',
+        }).composite([{ input: watermarkFile.buffer, gravity: 'southeast' }]).png().toBuffer();
+      }
+      else {
+        newBuffer = await sharp(buffer).png().toBuffer();
+      }
       newBuffers.push(newBuffer);
       break;
     case 'image/tiff':
@@ -186,42 +225,44 @@ async function toPdf(buffers, filepath, fileName) {
   return fileName + '.pdf';
 }
 
-async function toFile(buffer, filepath, fileName, suffix, type, crops) {
-  console.log('toFile:', filepath, fileName, type);
-  const name = path.parse(fileName).name;
+
+async function toFile(buffer, fullPath, originalFile, suffix, fileType, crops) {
+  console.log('toFile:', fullPath, originalFile, fileType);
+  const name = path.parse(originalFile).name;
   let extension = null;
 
-  const sharpBuffer = await cropImage(buffer, crops);
+  sharpBuffer = buffer;
+  //const sharpBuffer = await cropImage(buffer, crops);
 
-  switch (type) {
+  switch (fileType) {
     case 'image/png':
       extension = '.png'
-      await sharp(sharpBuffer).png().toFile(filepath + name + suffix + extension)
+      await sharp(sharpBuffer).png().toFile(fullPath + name + suffix + extension)
 
       break;
     case 'image/gif':
       extension = '.gif'
-      await sharp(sharpBuffer).gif().toFile(filepath + name + suffix + extension);
+      await sharp(sharpBuffer).gif().toFile(fullPath + name + suffix + extension);
 
       break;
     case 'image/jpeg':
       extension = '.jpg'
-      await sharp(sharpBuffer).jpeg().toFile(filepath + name + suffix + extension);
+      await sharp(sharpBuffer).jpeg().toFile(fullPath + name + suffix + extension);
 
       break;
     case 'image/webp':
       extension = '.webp'
-      await sharp(sharpBuffer).webp().toFile(filepath + name + suffix + extension);
+      await sharp(sharpBuffer).webp().toFile(fullPath + name + suffix + extension);
 
       break;
     case 'image/avif':
       extension = '.avif'
-      await sharp(sharpBuffer).avif().toFile(filepath + name + suffix + extension);
+      await sharp(sharpBuffer).avif().toFile(fullPath + name + suffix + extension);
 
       break;
     case 'image/tiff':
       extension = '.tif'
-      await sharp(sharpBuffer).tiff().toFile(filepath + name + suffix + extension);
+      await sharp(sharpBuffer).tiff().toFile(fullPath + name + suffix + extension);
 
       break;
   }
