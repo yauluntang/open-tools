@@ -93,7 +93,7 @@ const options = {
 
 let server;
 
-
+/*
 if (env === 'production') {
   app.use(express.static('dist'))
   app.get('*', (req, res) => res.sendFile(path.resolve('dist', 'index.html')));
@@ -111,7 +111,13 @@ else {
   echo.installHandlers(server, { prefix: '/api/e' });
 
 
-}
+}*/
+
+server = http.createServer(app).listen(port);
+ViteExpress.bind(app, server);
+echo.installHandlers(server, { prefix: '/api/e' });
+
+
 /*
 const primus = new Primus(server);
 primus.on('connection', (spark) => {
